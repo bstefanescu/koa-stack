@@ -1,0 +1,27 @@
+{
+  "name": "koa-stack",
+  "version": "0.6.7",
+  "private": true,
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "clean": "npm run clean --workspaces",
+    "test": "npm run test --workspaces"
+  },
+  "keywords": [],
+  "author": "stefanescu.bogdan@gmail.com",
+  "license": "MIT",
+  "workspaces": [
+    "packages/router",
+    "packages/body",
+    "packages/auth",
+    "packages/auth-firebase",
+    "packages/server"
+  ],
+  "devDependencies": {
+    "@types/koa": "^2.13.8",
+    "rimraf": "^5.0.1",
+    "typescript": "^5.2.2"
+  }
+}

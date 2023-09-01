@@ -1,0 +1,30 @@
+{
+  "name": "@koa-stack/body",
+  "version": "1.0.0",
+  "description": "Expose the request body as a promise in koa context",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run clean && tsc --build",
+    "clean": "rimraf ./build ./tsconfig.tsbuildinfo",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "koa",
+    "body",
+    "parser",
+    "lazy"
+  ],
+  "author": "stefanescu.bogdan@gmail.com",
+  "license": "MIT",
+  "dependencies": {
+    "formidable": "^3.5.1",
+    "inflation": "^2.0.0",
+    "qs": "^6.11.2",
+    "raw-body": "^2.5.2"
+  },
+  "devDependencies": {
+    "@types/formidable": "^3.4.2",
+    "@types/inflation": "^2.0.1",
+    "@types/qs": "^6.9.8"
+  }
+}

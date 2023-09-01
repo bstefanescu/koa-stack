@@ -1,0 +1,17 @@
+{
+  "name": "@koa-stack/auth",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run clean && tsc --build",
+    "clean": "rimraf ./build ./tsconfig.tsbuildinfo",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "stefanescu.bogdan@gmail.com",
+  "license": "MIT",
+  "dependencies": {
+    "koa": "^2.14.2"
+  }
+}

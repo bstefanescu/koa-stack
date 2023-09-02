@@ -69,7 +69,12 @@ class EndpointRoute implements Route {
 
     dispatch(ctx: Context) {
         try {
-            return Promise.resolve(this.target.call(this.thisArg, ctx));
+            return Promise.resolve(this.target.call(this.thisArg, ctx)).then(r => {
+                if (r !== undefined) {
+                    ctx.body = r;
+                }
+                return r;
+            });
         } catch (err) {
             return Promise.reject(err);
         }

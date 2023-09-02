@@ -3,7 +3,7 @@ import Koa from 'koa';
 import { LazyBody, LazyBodyOpts } from '@koa-stack/body';
 import { Router } from "@koa-stack/router";
 
-export default class KoaServer extends Router {
+export class KoaServer extends Router {
 
     server?: http.Server;
     koa: Koa;

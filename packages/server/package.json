@@ -1,18 +1,27 @@
 {
   "name": "@koa-stack/server",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "0.7.0",
+  "description": " A web server based on koa with advanced routing, lazy body and flexbile error handling",
+  "main": "./build/index.js",
   "scripts": {
     "build": "npm run clean && tsc --build",
     "clean": "rimraf ./build ./tsconfig.tsbuildinfo",
+    "prepublish": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "files": [
+    "build",
+    "src"
+  ],
+  "keywords": [
+    "web",
+    "server",
+    "koa"
+  ],
   "author": "stefanescu.bogdan@gmail.com",
   "license": "MIT",
   "dependencies": {
-    "@koa-stack/router": "^1.0.0",
-    "@koa-stack/body": "^1.0.0"
+    "@koa-stack/body": "^0.7.0",
+    "@koa-stack/router": "^0.7.0"
   }
 }

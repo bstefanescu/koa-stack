@@ -1,0 +1,29 @@
+{
+    "extends": "../tsconfig.base.json",
+    "references": [
+        {
+            "path": "../packages/server"
+        },
+        {
+            "path": "../packages/router"
+        },
+        {
+            "path": "../packages/body"
+        }
+    ],
+    "compilerOptions": {
+        "rootDir": "./src",
+        "outDir": "./build",
+        "paths": {
+            "@koa-stack/server": [
+                "../packages/server/build"
+            ],
+            "@koa-stack/router": [
+                "../packages/router/build"
+            ],
+            "@koa-stack/body": [
+                "../packages/body/build"
+            ]
+        },
+    }
+}

@@ -1,13 +1,18 @@
 {
   "name": "@koa-stack/auth-firebase",
-  "version": "1.0.0",
+  "version": "0.7.0",
   "description": "Firebase auth module for @koa-stack/auth",
-  "main": "index.js",
+  "main": "./build/index.js",
   "scripts": {
     "build": "npm run clean && tsc --build",
     "clean": "rimraf ./build ./tsconfig.tsbuildinfo",
+    "prepublish": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "files": [
+    "build",
+    "src"
+  ],
   "keywords": [
     "auth",
     "koa",
@@ -19,6 +24,6 @@
     "firebase-admin": "^11.10.1"
   },
   "dependencies": {
-    "@koa-stack/auth": "^1.0.0"
+    "@koa-stack/auth": "^0.7.0"
   }
 }

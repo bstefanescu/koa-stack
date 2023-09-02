@@ -1,0 +1,28 @@
+{
+  "name": "@koa-stack/test",
+  "version": "0.7.0",
+  "private": true,
+  "description": "Tests",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run clean && tsc --project ./tsconfig.build.json",
+    "clean": "rimraf ./build ./tsconfig.tsbuildinfo ./tsconfig.build.tsbuildinfo",
+    "itest": "mocha -r './build/index.js'",
+    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register './src/index.ts'"
+  },
+  "keywords": [],
+  "author": "stefanescu.bogdan@gmail.com",
+  "license": "MIT",
+  "dependencies": {
+    "@koa-stack/auth": "*",
+    "@koa-stack/body": "*",
+    "@koa-stack/router": "*",
+    "@koa-stack/server": "*"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.3.5",
+    "@types/supertest": "^2.0.12",
+    "chai": "^4.3.8",
+    "supertest": "^6.3.3"
+  }
+}

@@ -1,13 +1,18 @@
 {
   "name": "@koa-stack/router",
-  "version": "1.0.0",
+  "version": "0.7.0",
   "description": "A powerfull koa router using typescript decorations",
-  "main": "index.js",
+  "main": "./build/index.js",
   "scripts": {
     "build": "npm run clean && tsc --build",
     "clean": "rimraf ./build ./tsconfig.tsbuildinfo",
+    "prepublish": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "files": [
+    "build",
+    "src"
+  ],
   "keywords": [
     "koa",
     "router",
@@ -17,7 +22,7 @@
   "author": "stefanescu.bogdan@gmail.com",
   "license": "MIT",
   "dependencies": {
-    "koa": ">=2.14.2",
+    "koa": "^2.14.2",
     "koa-send": "^5.0.1",
     "path-to-regexp": "^6.2.1",
     "statuses": "^2.0.1"

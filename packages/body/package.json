@@ -1,13 +1,18 @@
 {
   "name": "@koa-stack/body",
-  "version": "1.0.0",
-  "description": "Expose the request body as a promise in koa context",
-  "main": "index.js",
+  "version": "0.7.0",
+  "description": "Expose the request body as a promise in koa Context.body",
+  "main": "./build/index.js",
   "scripts": {
     "build": "npm run clean && tsc --build",
     "clean": "rimraf ./build ./tsconfig.tsbuildinfo",
+    "prepublish": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "files": [
+    "build",
+    "src"
+  ],
   "keywords": [
     "koa",
     "body",

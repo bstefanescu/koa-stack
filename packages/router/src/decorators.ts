@@ -1,5 +1,6 @@
+import { Middleware } from "koa";
 import { RouterSetup } from ".";
-import { Router } from "./router";
+import { Resource, Router } from "./router";
 
 
 function getOrCreateSetupChain(target: any): RouterSetup[] {
@@ -14,16 +15,45 @@ function getOrCreateSetupChain(target: any): RouterSetup[] {
     return target.$routerSetup;
 }
 
-
-export function mount(path: string) {
-    return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
-        const isGetter = !!descriptor.get;
-        getOrCreateSetupChain(target.constructor).push((resource: any, router: Router) => {
-            const value = resource[propertyKey];
-            router.mount(path, isGetter ? value : value());
-        });
+export function filters(...middlewares: Middleware[]) {
+    return (constructor: Function) => {
+        const chain = getOrCreateSetupChain(constructor);
+        for (const middleware of middlewares) {
+            chain.push((resource: any, router: Router) => {
+                router.use(middleware);
+            });
+        }
     }
 }
+
+export type ResourceConstructor<T extends Resource = Resource> = new () => T;
+
+export function routes(map: Record<string, Resource | ResourceConstructor>) {
+    return (constructor: Function) => {
+        const chain = getOrCreateSetupChain(constructor);
+        for (const key in map) {
+            chain.push((resource: any, router: Router) => {
+                router.mount(key, map[key]);
+            });
+        }
+    }
+}
+
+// deprecated decorators. Use @routes and @filters instead
+// export function mount(path: string) {
+//     return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+//         const isGetter = !!descriptor.get;
+//         getOrCreateSetupChain(target.constructor).push((resource: any, router: Router) => {
+//             const value = resource[propertyKey];
+//             router.mount(path, isGetter ? value : value());
+//         });
+//     }
+// }
+// export function use(target: any, propertyKey: string, descriptor: PropertyDescriptor): void {
+//     getOrCreateSetupChain(target.constructor).push((resource: any, router: Router) => {
+//         router.use(resource[propertyKey].bind(resource));
+//     });
+// }
 
 export function serve(path: string) {
     return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
@@ -35,11 +65,6 @@ export function serve(path: string) {
     }
 }
 
-export function use(target: any, propertyKey: string, descriptor: PropertyDescriptor): void {
-    getOrCreateSetupChain(target.constructor).push((resource: any, router: Router) => {
-        router.use(resource[propertyKey].bind(resource));
-    });
-}
 
 export function guard(target: any, propertyKey: string, descriptor: PropertyDescriptor): void {
     getOrCreateSetupChain(target.constructor).push((resource: any, router: Router) => {

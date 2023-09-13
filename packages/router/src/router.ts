@@ -129,7 +129,7 @@ type RouterOpts = {
     errorHandlers?: ErrorHandlerOpts
 }
 
-export class Router implements Route {
+export abstract class AbstractRouter<T extends AbstractRouter<T>> implements Route {
 
     prefix: string;
     prefixMatcher: PrefixMatcher;
@@ -298,6 +298,9 @@ export class Router implements Route {
         this.route('TRACE', pattern, target, thisArg);
     }
 }
+export class Router extends AbstractRouter<Router> {
+}
+
 
 export type RouterSetup = (resource: any, router: Router) => void;
 export abstract class Resource {
@@ -320,3 +323,4 @@ export abstract class Resource {
         }
     }
 }
+

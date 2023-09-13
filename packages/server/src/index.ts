@@ -1,9 +1,10 @@
+import { LazyBody, LazyBodyOpts } from '@koa-stack/body';
+import { AbstractRouter } from "@koa-stack/router";
 import http from 'http';
 import Koa from 'koa';
-import { LazyBody, LazyBodyOpts } from '@koa-stack/body';
-import { Router } from "@koa-stack/router";
 
-export class KoaServer extends Router {
+
+export abstract class AbstractKoaServer<T extends AbstractKoaServer<T>> extends AbstractRouter<T> {
 
     server?: http.Server;
     koa: Koa;
@@ -91,4 +92,7 @@ export class KoaServer extends Router {
     }
 
 
+}
+
+export class KoaServer extends AbstractKoaServer<KoaServer> {
 }

@@ -1,6 +1,6 @@
 {
   "name": "@koa-stack/test",
-  "version": "0.7.0",
+  "version": "0.8.1",
   "private": true,
   "description": "Tests",
   "main": "index.js",
@@ -14,10 +14,10 @@
   "author": "stefanescu.bogdan@gmail.com",
   "license": "MIT",
   "dependencies": {
-    "@koa-stack/auth": "*",
-    "@koa-stack/body": "*",
-    "@koa-stack/router": "*",
-    "@koa-stack/server": "*"
+    "@koa-stack/auth": "0.8.1",
+    "@koa-stack/body": "0.8.1",
+    "@koa-stack/router": "0.8.1",
+    "@koa-stack/server": "0.8.1"
   },
   "devDependencies": {
     "@types/chai": "^4.3.5",

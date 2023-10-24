@@ -35,7 +35,7 @@ export class ApiKeyAuth<PrincipalT> extends AuthModule<ApiKeyToken<PrincipalT>, 
         if (authScheme === this.scheme) {
             for (const prefix of this.prefixes) {
                 if (authToken.startsWith(prefix)) {
-                    return Promise.resolve(new ApiKeyToken<PrincipalT>(this, prefix));
+                    return Promise.resolve(new ApiKeyToken<PrincipalT>(this, authToken));
                 }
             }
         }

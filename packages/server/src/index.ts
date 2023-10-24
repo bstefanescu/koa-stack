@@ -3,6 +3,11 @@ import { AbstractRouter } from "@koa-stack/router";
 import http from 'http';
 import Koa from 'koa';
 
+declare module 'koa' {
+    interface BaseContext {
+        params: Record<string, string>
+    }
+}
 
 export abstract class AbstractKoaServer<T extends AbstractKoaServer<T>> extends AbstractRouter<T> {
 
@@ -12,6 +17,10 @@ export abstract class AbstractKoaServer<T extends AbstractKoaServer<T>> extends 
     constructor(koa: Koa = new Koa()) {
         super();
         this.koa = koa;
+        // params is an alias to $touter.params
+        Object.defineProperty(koa.context, 'params', {
+            get() { return this.$router.params; }
+        });
     }
 
     setup() { }

@@ -1,9 +1,9 @@
 import { AuthError } from "./error.js";
-import { AuthModule, AuthModuleOptions, IAuthUser, Principal } from "./module.js";
+import { AuthModule, AuthModuleOptions, AuthToken } from "./module.js";
 
-export class ApiKeyPrincipal<UserT extends IAuthUser> extends Principal<UserT> {
+export class ApiKeyToken<PrincipalT> extends AuthToken<PrincipalT> {
 
-    constructor(module: ApiKeyAuth<UserT>, apiKey: string) {
+    constructor(module: ApiKeyAuth<PrincipalT>, apiKey: string) {
         super(module, apiKey);
     }
 
@@ -12,17 +12,17 @@ export class ApiKeyPrincipal<UserT extends IAuthUser> extends Principal<UserT> {
 /**
  * the authorization scheme defaulots to "bearer"
  */
-export interface ApiKeyAuthOptions<UserT extends IAuthUser> extends AuthModuleOptions<ApiKeyPrincipal<UserT>, UserT> {
+export interface ApiKeyAuthOptions<PrincipalT> extends AuthModuleOptions<ApiKeyToken<PrincipalT>, PrincipalT> {
     prefixes: string[];
     scheme?: string;
 }
 
-export class ApiKeyAuth<UserT extends IAuthUser> extends AuthModule<ApiKeyPrincipal<UserT>, UserT> {
+export class ApiKeyAuth<PrincipalT> extends AuthModule<ApiKeyToken<PrincipalT>, PrincipalT> {
 
     prefixes: string[];
     scheme: string;
 
-    constructor(opts: ApiKeyAuthOptions<UserT>) {
+    constructor(opts: ApiKeyAuthOptions<PrincipalT>) {
         super('apikey', opts);
         this.scheme = opts.scheme || 'bearer';
         this.prefixes = opts.prefixes;
@@ -31,11 +31,11 @@ export class ApiKeyAuth<UserT extends IAuthUser> extends AuthModule<ApiKeyPrinci
         }
     }
 
-    authorize(authScheme: string, authToken: string): Promise<ApiKeyPrincipal<UserT> | undefined> {
+    authorize(authScheme: string, authToken: string): Promise<ApiKeyToken<PrincipalT> | undefined> {
         if (authScheme === this.scheme) {
             for (const prefix of this.prefixes) {
                 if (authToken.startsWith(prefix)) {
-                    return Promise.resolve(new ApiKeyPrincipal<UserT>(this, prefix));
+                    return Promise.resolve(new ApiKeyToken<PrincipalT>(this, prefix));
                 }
             }
         }

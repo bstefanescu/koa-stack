@@ -1,8 +1,8 @@
-import { AuthModule, IAuthUser, Principal } from "./module.js";
+import { AuthModule, AuthToken } from "./module.js";
 
-export class AnonymousPrincipal<UserT extends IAuthUser> extends Principal<UserT> {
+export class AnonymousToken<PrincipalT> extends AuthToken<PrincipalT> {
 
-    constructor(module: AnonymousAuth<UserT>) {
+    constructor(module: AnonymousAuth<PrincipalT>) {
         super(module, "#anonymous");
     }
 
@@ -12,10 +12,10 @@ export class AnonymousPrincipal<UserT extends IAuthUser> extends Principal<UserT
 }
 
 
-export class AnonymousAuth<UserT extends IAuthUser> extends AuthModule<AnonymousPrincipal<UserT>, UserT> {
+export class AnonymousAuth<PrincipalT> extends AuthModule<AnonymousToken<PrincipalT>, PrincipalT> {
 
-    authorize(): Promise<AnonymousPrincipal<UserT> | undefined> {
-        return Promise.resolve(new AnonymousPrincipal<UserT>(this));
+    authorize(): Promise<AnonymousToken<PrincipalT> | undefined> {
+        return Promise.resolve(new AnonymousToken<PrincipalT>(this));
     }
 
 } 

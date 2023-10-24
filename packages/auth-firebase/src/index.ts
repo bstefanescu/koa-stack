@@ -1,15 +1,15 @@
 import firebase from 'firebase-admin';
 import { DecodedIdToken } from 'firebase-admin/auth';
-import { AuthError, AuthModule, AuthModuleOptions, IAuthUser, Principal } from '@koa-stack/auth';
+import { AuthError, AuthModule, AuthModuleOptions, AuthToken } from '@koa-stack/auth';
 
 function verifyIdToken(token: string, checkRevoked?: boolean | undefined) {
     return firebase.auth().verifyIdToken(token, checkRevoked);
 }
 
 
-export class FirebasePrincipal<UserT extends IAuthUser> extends Principal<UserT> {
+export class FirebaseToken<PrincipalT> extends AuthToken<PrincipalT> {
 
-    constructor(module: FirebaseAuth<UserT>, public token: DecodedIdToken) {
+    constructor(module: FirebaseAuth<PrincipalT>, public token: DecodedIdToken) {
         super(module, token.uid);
     }
 
@@ -19,11 +19,11 @@ export class FirebasePrincipal<UserT extends IAuthUser> extends Principal<UserT>
 
 }
 
-export class FirebaseAuth<UserT extends IAuthUser> extends AuthModule<FirebasePrincipal<UserT>, UserT> {
+export class FirebaseAuth<PrincipalT> extends AuthModule<FirebaseToken<PrincipalT>, PrincipalT> {
 
     logError = (err: any) => console.error('Firebase auth failed', err);
 
-    constructor(opts: AuthModuleOptions<FirebasePrincipal<UserT>>) {
+    constructor(opts: AuthModuleOptions<FirebaseToken<PrincipalT>>) {
         super('firebase', opts)
     }
 
@@ -32,11 +32,11 @@ export class FirebaseAuth<UserT extends IAuthUser> extends AuthModule<FirebasePr
         return this;
     }
 
-    async authorize(authScheme: string, authToken: string): Promise<FirebasePrincipal<UserT> | undefined> {
+    async authorize(authScheme: string, authToken: string): Promise<FirebaseToken<PrincipalT> | undefined> {
         if (authScheme === 'bearer') {
             try {
                 const decodedToken = await verifyIdToken(authToken);
-                return new FirebasePrincipal(this, decodedToken);
+                return new FirebaseToken(this, decodedToken);
             } catch (err) {
                 this.logError(err);
                 throw AuthError.notAuthorized();

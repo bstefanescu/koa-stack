@@ -2,26 +2,9 @@ import { IncomingMessage } from 'http';
 import { Context, Next } from 'koa';
 import { AuthError } from './error.js';
 
-/**
- * An interface for user objects. Should be implemented by the application 
- * 
- * The user object is used on the server to get basic details about the user and 
- * to be able to check permissions. Usually it is wrapping a database user model filled 
- * with basic details and optionally with roles and permissions.
- * 
- * The user object required by the client side may requrie additional information ans must be serializable as json.
- * You can get the user object to be sent to the client using `toJsonObject`
- * This method is async because it may need to fetch additional information from the database.
- * 
- * The only requoirement for the user object is to provide a toJsonObject method.
- */
-export interface IAuthUser {
-    toJsonObject: () => Promise<Record<string, any>>;
-}
-
-export abstract class Principal<UserT extends IAuthUser = any> {
-    _user: Promise<any> | undefined;
-    constructor(public module: AuthModule<any, UserT>, public id: string) {
+export abstract class AuthToken<PrincipalT = any> {
+    _principal: Promise<any> | undefined;
+    constructor(public module: AuthModule<any, PrincipalT>, public id: string) {
     }
     get type() {
         return this.module.name;
@@ -35,23 +18,11 @@ export abstract class Principal<UserT extends IAuthUser = any> {
         return undefined;
     }
 
-    createUser(): Promise<UserT> {
-        return this.module.createUser(this);
-    }
-
-    getUser(): Promise<UserT | null> {
-        if (!this._user) {
-            this._user = this.module.getUser(this);
+    getPrincipal(): Promise<PrincipalT | null> {
+        if (!this._principal) {
+            this._principal = this.module.getPrincipal(this);
         }
-        return this._user;
-    }
-
-    async getOrCreateUser(): Promise<UserT> {
-        const user = await this.getUser();
-        if (!user) {
-            this._user = this.createUser();
-        }
-        return this._user;
+        return this._principal;
     }
 }
 
@@ -62,27 +33,18 @@ export function registerAuthModule(module: AuthModule<any>) {
     MODULES.push(module);
 }
 
-export interface AuthModuleOptions<PrincipalT extends Principal, UserT = any> {
-    getUser: (principal: PrincipalT) => Promise<UserT | null>;
-    createUser?: (principal: PrincipalT) => Promise<UserT>,
+export interface AuthModuleOptions<TokenT extends AuthToken, PrincipalT = any> {
+    getPrincipal: (token: TokenT) => Promise<PrincipalT | null>,
 }
-export abstract class AuthModule<PrincipalT extends Principal = Principal, UserDocumentT = any> {
+export abstract class AuthModule<TokenT extends AuthToken = AuthToken, PrincipalT = any> {
 
-    constructor(public name: string, public opts: AuthModuleOptions<PrincipalT, UserDocumentT>) {
+    constructor(public name: string, public opts: AuthModuleOptions<TokenT, PrincipalT>) {
     }
 
-    abstract authorize(authScheme: string, authToken: string, req: IncomingMessage): Promise<PrincipalT | undefined>;
+    abstract authorize(authScheme: string, authToken: string, req: IncomingMessage): Promise<TokenT | undefined>;
 
-    createUser(principal: PrincipalT): Promise<UserDocumentT> {
-        if (this.opts.createUser) {
-            return this.opts.createUser(principal);
-        } else {
-            throw AuthError.notSupported();
-        }
-    }
-
-    getUser(principal: PrincipalT): Promise<UserDocumentT | null> {
-        return this.opts.getUser(principal);
+    getPrincipal(token: TokenT): Promise<PrincipalT | null> {
+        return this.opts.getPrincipal(token);
     }
 
     register() {
@@ -110,23 +72,33 @@ function extractAuthToken(req: IncomingMessage): { scheme: string, token: string
     return null;
 }
 
-export async function authorize(ctx: Context): Promise<Principal> {
-    if (ctx.state.principal) {
-        return ctx.state.principal;
+export async function tryAuthorize(ctx: Context): Promise<AuthToken | null> {
+    if (ctx.auth) {
+        return ctx.auth;
     }
-    const principal = await authorizeRequest(ctx.req);
-    ctx.state.principal = principal;
-    return principal;
+    const token = await tryAuthorizeRequest(ctx.req);
+    if (token) {
+        ctx.auth = token;
+    }
+    return token;
 }
 
-export async function authorizeRequest(req: IncomingMessage): Promise<Principal> {
+export async function authorize(ctx: Context): Promise<AuthToken> {
+    if (ctx.auth) {
+        return ctx.auth;
+    }
+    ctx.auth = await authorizeRequest(ctx.req);
+    return ctx.auth;
+}
+
+export async function tryAuthorizeRequest(req: IncomingMessage): Promise<AuthToken | null> {
     try {
         let auth = extractAuthToken(req);
         if (auth) {
             for (const module of MODULES) {
-                const principal = await module.authorize(auth.scheme, auth.token, req);
-                if (principal) {
-                    return principal;
+                const token = await module.authorize(auth.scheme, auth.token, req);
+                if (token) {
+                    return token;
                 }
             }
         }
@@ -137,7 +109,15 @@ export async function authorizeRequest(req: IncomingMessage): Promise<Principal>
             throw AuthError.unexpectedError();
         }
     }
-    throw AuthError.notAuthorized();
+    return Promise.resolve(null);
+}
+
+export async function authorizeRequest(req: IncomingMessage): Promise<AuthToken> {
+    const token = await tryAuthorizeRequest(req);
+    if (!token) {
+        throw AuthError.notAuthorized();
+    }
+    return token;
 }
 
 export async function authMiddleware(ctx: Context, next: Next): Promise<unknown> {

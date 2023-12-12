@@ -5,9 +5,10 @@ import send from 'koa-send';
 
 import { errorHandler, ErrorHandlerOpts } from './error';
 import {
-    normalizePath, createPathMatcher, createPathPrefixMatcher,
-    createSimplePrefixMatcher, PathMatcher, PrefixMatcher
+    normalizePath, createPathPrefixMatcher,
+    createSimplePrefixMatcher, PathMatcher, PrefixMatcher, createPathMatcherUnsafe
 } from './path-matchers';
+import { ServerError } from './ServerError';
 
 
 declare module 'koa' {
@@ -28,41 +29,61 @@ export interface Route {
 export class RouterContext {
     params: any = {};
     path: string;
+    matchedPattern?: string;
+    // used internally to indicate that the path matched at least an endpoint but the method does not
+    // in case of a 405 the value is the endpoint pattern 
+    _maybe405?: string;
 
     constructor(ctx: Context) {
         this.path = normalizePath(ctx.path);
         ctx.$router = this;
     }
 
+    // used by the parent router prefix matcher
     update(params?: object) {
+        params && Object.assign(this.params, params);
+    }
+
+    // called on an endpoint match to update matching info
+    onMatch(matchedPattern: string, params?: object) {
+        this.matchedPattern = matchedPattern;
         params && Object.assign(this.params, params);
     }
 }
 
 class EndpointRoute implements Route {
+    pathPattern: string;
     method: string | null | undefined;
     matcher: PathMatcher;
     target: RouteTarget;
     thisArg: any;
 
-    constructor(method: string | null | undefined, matcher: PathMatcher, target: RouteTarget, thisArg?: any) {
+    constructor(method: string | null | undefined, pathPattern: string, target: RouteTarget, thisArg?: any) {
+        this.pathPattern = normalizePath(pathPattern);
         this.method = method ? method.toUpperCase() : null;
-        this.matcher = matcher;
+        this.matcher = createPathMatcherUnsafe(this.pathPattern);
         this.target = target;
         this.thisArg = thisArg;
     }
 
     match(ctx: Context, path: string): boolean {
-        if (this.method && this.method !== ctx.method) {
+        const match = this.matcher(path);
+        if (!match) {
             return false;
         }
-        const match = this.matcher(path);
+        // path matches        
+        if (this.method && this.method !== ctx.method) {
+            ctx.$router._maybe405 = this.pathPattern;
+            return false;
+        }
+        // path and method matches
         if (match === true) {
+            ctx.$router.onMatch(this.pathPattern);
             return true;
         } else if (match) {
-            ctx.$router.update(match.params);
+            ctx.$router.onMatch(this.pathPattern, match.params);
             return true;
-        } else {
+        } else { // should never happens
             return false;
         }
     }
@@ -151,10 +172,6 @@ export abstract class AbstractRouter<T extends AbstractRouter<T>> implements Rou
         return this.prefixMatcher(ctx, path);
     }
 
-    notFound(ctx: Context) {
-        ctx.throw(404);
-    }
-
     async _dispatch(ctx: Context): Promise<unknown> {
         if (this.guard) {
             if (!await this.guard(ctx)) {
@@ -167,7 +184,13 @@ export abstract class AbstractRouter<T extends AbstractRouter<T>> implements Rou
                 return await route.dispatch(ctx);
             }
         }
-        return await this.notFound(ctx);
+        //TODO add support for 405 method not allowed
+        if (ctx.$router._maybe405) {
+            throw new ServerError(405, 'Method ' + ctx.method + ' not allowed on endpoint ' + ctx.$router._maybe405);
+            //ctx.throw(405, 'Method ' + ctx.method + ' not allowed on endpoint ' + ctx.$router._maybe405);
+        } else {
+            ctx.throw(404);
+        }
     }
 
     async dispatch(ctx: Context): Promise<unknown> {
@@ -225,8 +248,7 @@ export abstract class AbstractRouter<T extends AbstractRouter<T>> implements Rou
     }
 
     route(method: string | null | undefined, path: string, target: RouteTarget, thisArg?: any) {
-        const matcher = path && path !== '/' ? createPathMatcher(path) : (path: string) => !path || path === '/';
-        this.routes.push(new EndpointRoute(method, matcher, target, thisArg));
+        this.routes.push(new EndpointRoute(method, path, target, thisArg));
     }
 
     routeAll(path: string, target: RouteTarget) {

@@ -1,12 +1,6 @@
 import assert from 'assert';
 import request from 'supertest';
-import { ApiRoot, ApiRootBad, OtherApi } from './api-root';
 import server from './server';
-
-server.mount('/api', ApiRoot);
-// test mount instance instead of class
-server.mount('/api-bad', new ApiRootBad());
-server.mount('/api-other', OtherApi);
 
 describe('Test router resources inheritance', () => {
 

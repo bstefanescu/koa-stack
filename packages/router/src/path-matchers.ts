@@ -8,10 +8,23 @@ export type PrefixMatcher = (ctx: Context, path: string) => boolean;
 function decode(val: string): string {
     return val ? decodeURIComponent(val) : val;
 }
-
+/**
+ * Safe version of createPathMatcherUnsafe. The pattern path will be normalized using the normalizePath.
+ * @param pattern 
+ * @returns 
+ */
 export function createPathMatcher(pattern: string): PathMatcher {
-    pattern = normalizePath(pattern);
-    if (pattern.endsWith('/*')) {
+    return createPathMatcherUnsafe(normalizePath(pattern));
+}
+/**
+ * The path patten must be normalized using the normalizePath when calling this function.
+ * @param pattern 
+ * @returns 
+ */
+export function createPathMatcherUnsafe(pattern: string): PathMatcher {
+    if (!pattern || pattern === '/') {
+        return (path: string) => !path || path === '/';
+    } else if (pattern.endsWith('/*')) {
         return match(pattern.substring(0, pattern.length - 1) + ':_*', { decode: decode });
     } else if (pattern.endsWith('/+')) {
         return match(pattern.substring(0, pattern.length - 1) + ':_+', { decode: decode });

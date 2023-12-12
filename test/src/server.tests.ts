@@ -1,11 +1,6 @@
 import assert from 'assert';
 import request from 'supertest';
-import { Context } from 'koa';
 import server from './server';
-
-server.get('/', async (ctx: Context) => {
-    ctx.body = 'hello';
-});
 
 describe('Test koaserver accept requests', () => {
     it('Accept requests', done => {

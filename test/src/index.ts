@@ -20,6 +20,10 @@ before(() => {
     });
 
     server.mount('/router-test', ApiRoot);
+    // server.use(async (ctx: Context, next: Next) => {
+    //     await next();
+    //     console.log('>>>>>>>router', ctx.$router);
+    // });
 });
 
 after(() => {

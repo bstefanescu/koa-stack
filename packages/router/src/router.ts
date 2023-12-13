@@ -1,12 +1,14 @@
-import { resolve as resolvePath, join as joinPath } from 'path';
 import { Context, Middleware, Next } from "koa";
 import compose from 'koa-compose';
 import send from 'koa-send';
+import { join as joinPath, resolve as resolvePath } from 'path';
 
 import { errorHandler, ErrorHandlerOpts } from './error';
 import {
-    normalizePath, createPathPrefixMatcher,
-    createSimplePrefixMatcher, PathMatcher, PrefixMatcher, createPathMatcherUnsafe
+    createPathMatcherUnsafe, createPathPrefixMatcherUnsafe,
+    createSimplePrefixMatcher,
+    normalizePath,
+    PathMatcher, PrefixMatcher
 } from './path-matchers';
 import { ServerError } from './ServerError';
 
@@ -52,18 +54,28 @@ export class RouterContext {
 }
 
 class EndpointRoute implements Route {
+    router: Router;
     pathPattern: string;
     method: string | null | undefined;
     matcher: PathMatcher;
     target: RouteTarget;
     thisArg: any;
+    _absPathPattern?: string;
 
-    constructor(method: string | null | undefined, pathPattern: string, target: RouteTarget, thisArg?: any) {
+    constructor(router: Router, method: string | null | undefined, pathPattern: string, target: RouteTarget, thisArg?: any) {
+        this.router = router;
         this.pathPattern = normalizePath(pathPattern);
         this.method = method ? method.toUpperCase() : null;
         this.matcher = createPathMatcherUnsafe(this.pathPattern);
         this.target = target;
         this.thisArg = thisArg;
+    }
+
+    get absPathPattern() {
+        if (this._absPathPattern == null) {
+            this._absPathPattern = this.router.getAbsPath(this.pathPattern);
+        }
+        return this._absPathPattern;
     }
 
     match(ctx: Context, path: string): boolean {
@@ -73,15 +85,15 @@ class EndpointRoute implements Route {
         }
         // path matches        
         if (this.method && this.method !== ctx.method) {
-            ctx.$router._maybe405 = this.pathPattern;
+            ctx.$router._maybe405 = this.absPathPattern;
             return false;
         }
         // path and method matches
         if (match === true) {
-            ctx.$router.onMatch(this.pathPattern);
+            ctx.$router.onMatch(this.absPathPattern);
             return true;
         } else if (match) {
-            ctx.$router.onMatch(this.pathPattern, match.params);
+            ctx.$router.onMatch(this.absPathPattern, match.params);
             return true;
         } else { // should never happens
             return false;
@@ -151,7 +163,8 @@ type RouterOpts = {
 }
 
 export abstract class AbstractRouter<T extends AbstractRouter<T>> implements Route {
-
+    parent?: AbstractRouter<T>;
+    _absPrefix?: string;
     prefix: string;
     prefixMatcher: PrefixMatcher;
     guard?: RouterGuard;
@@ -161,11 +174,24 @@ export abstract class AbstractRouter<T extends AbstractRouter<T>> implements Rou
     webRoot: string;
     errorHandlerOpts?: ErrorHandlerOpts;
 
-    constructor(prefix: string = '/', opts: RouterOpts = {}) {
-        this.prefix = prefix;
+    constructor(prefix: string = '/', opts: RouterOpts = {}, parent?: AbstractRouter<T>) {
+        this.prefix = normalizePath(prefix);
         this.webRoot = opts.webRoot || process.cwd();
         this.errorHandlerOpts = opts.errorHandlers;
-        this.prefixMatcher = createPathPrefixMatcher(prefix);
+        this.prefixMatcher = createPathPrefixMatcherUnsafe(this.prefix);
+        this.parent = parent;
+    }
+
+    get absPrefix(): string {
+        if (this._absPrefix == null) {
+            this._absPrefix = this.parent ? this.parent.getAbsPath(this.prefix) : this.prefix;
+        }
+        return this._absPrefix;
+    }
+
+    getAbsPath(path?: string) {
+        let abspath = path ? joinPath(this.absPrefix, path) : this.prefix;
+        return normalizePath(abspath);
     }
 
     match(ctx: Context, path: string) {
@@ -248,7 +274,7 @@ export abstract class AbstractRouter<T extends AbstractRouter<T>> implements Rou
     }
 
     route(method: string | null | undefined, path: string, target: RouteTarget, thisArg?: any) {
-        this.routes.push(new EndpointRoute(method, path, target, thisArg));
+        this.routes.push(new EndpointRoute(this, method, path, target, thisArg));
     }
 
     routeAll(path: string, target: RouteTarget) {
@@ -262,7 +288,7 @@ export abstract class AbstractRouter<T extends AbstractRouter<T>> implements Rou
      * @returns
      */
     mount(prefix: string, target?: any) {
-        const router = new Router(prefix, { webRoot: this.webRoot });
+        const router = new Router(prefix, { webRoot: this.webRoot }, this);
         // inherit error handling from parent router
         this.errorHandlerOpts && router.withErrorHandler(this.errorHandlerOpts);
         if (target) {

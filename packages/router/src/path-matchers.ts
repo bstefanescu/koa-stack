@@ -45,6 +45,10 @@ export function createRegexPathMatcher(pattern: string): MatchFunction {
 export function createPathPrefixMatcher(prefix: string): PrefixMatcher {
     // normalize prefix
     prefix = normalizePath(prefix);
+    return createPathPrefixMatcherUnsafe(normalizePath(prefix));
+}
+
+export function createPathPrefixMatcherUnsafe(prefix: string): PrefixMatcher {
     if (prefix.indexOf(':') === -1 && prefix.indexOf('(') === -1) {
         return createSimplePrefixMatcher(prefix);
     } else {

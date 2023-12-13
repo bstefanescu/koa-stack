@@ -118,6 +118,18 @@ export class ApiRootBad extends BaseResource {
 }
 
 
+export class ChildApi extends BaseResource {
+
+    @get('/')
+    getIndex(ctx: Context) {
+        ctx.body = 'ChildApi: ' + ctx.params.name;
+    }
+
+}
+
+@routes({
+    '/child/:name': ChildApi
+})
 export class OtherApi extends BaseResource {
 
     @get('/')

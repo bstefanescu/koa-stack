@@ -10,8 +10,15 @@ describe('Test router features', () => {
             done();
         });
     });
-    it('methode match works', done => {
+    it('existing method works', done => {
         request(server).get('/router-test/hello').then((res) => {
+            expect(res.status).to.be.equal(200);
+            done();
+        });
+    });
+
+    it('nested routers works', done => {
+        request(server).get('/api-other/child/hello').then((res) => {
             expect(res.status).to.be.equal(200);
             done();
         });

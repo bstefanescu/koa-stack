@@ -8,7 +8,10 @@
     "build": "npm run build --workspaces",
     "clean": "npm run clean --workspaces",
     "test": "npm run test -w test",
-    "itest": "npm run itest -w test"
+    "itest": "npm run itest -w test",
+    "bump:minor": "npx wst bump minor",
+    "bump:patch": "npx wst bump patch",
+    "bump:major": "npx wst bump major"
   },
   "keywords": [],
   "author": "stefanescu.bogdan@gmail.com",

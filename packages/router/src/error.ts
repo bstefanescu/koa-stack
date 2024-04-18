@@ -34,7 +34,7 @@ export interface ErrorHandlerOpts {
      * Update / adjust the generated error info object
      * The error info is used to write the response to the client (and can also be used by the log function)
      */
-    updateErrorInfo?: (ctx: Context, error: Error | object, info?: ErrorInfo | undefined) => void,
+    updateErrorInfo?: (ctx: Context, error: Error | object, info: ErrorInfo) => void,
 }
 
 function readFile(file: string) {

@@ -29,7 +29,12 @@ export interface ErrorHandlerOpts {
     html?: ErrorFormatter,
     text?: ErrorFormatter,
     // if log is specified does not delegate errors to koa error handler
-    log?: (ctx: Context, error: Error | object, info?: ErrorInfo | undefined) => void
+    log?: (ctx: Context, error: Error | object, info?: ErrorInfo | undefined) => void,
+    /**
+     * Update / adjust the generated error info object
+     * The error info is used to write the response to the client (and can also be used by the log function)
+     */
+    updateErrorInfo?: (ctx: Context, error: Error | object, info?: ErrorInfo | undefined) => void,
 }
 
 function readFile(file: string) {
@@ -149,6 +154,10 @@ function handleResponse(ctx: Context, err: Error | any, opts: ErrorHandlerOpts =
     };
     if (err.expose && err.message) info.message = err.message;
     if (err.expose && err.detail) info.detail = err.detail;
+
+    if (opts.updateErrorInfo) {
+        opts.updateErrorInfo(ctx, err, info);
+    }
 
     let content;
     switch (getContentType(ctx, err.ctype)) {

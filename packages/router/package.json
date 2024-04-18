@@ -1,6 +1,6 @@
 {
   "name": "@koa-stack/router",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "description": "A powerfull koa router using typescript decorations",
   "main": "./build/index.js",
   "scripts": {

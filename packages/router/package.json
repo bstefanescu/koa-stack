@@ -1,6 +1,6 @@
 {
   "name": "@koa-stack/router",
-  "version": "0.14.0",
+  "version": "0.14.1",
   "description": "A powerfull koa router using typescript decorations",
   "main": "./build/index.js",
   "scripts": {
@@ -22,9 +22,9 @@
   "author": "stefanescu.bogdan@gmail.com",
   "license": "MIT",
   "dependencies": {
-    "koa": "^2.14.2",
+    "koa": "^2.15.3",
     "koa-send": "^5.0.1",
-    "path-to-regexp": "^6.2.1",
+    "path-to-regexp": "^6.2.2",
     "statuses": "^2.0.1"
   },
   "devDependencies": {

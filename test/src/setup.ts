@@ -1,13 +1,10 @@
-//import { KoaServer } from "@koa-stack/server";
-import server from './server';
-
-import './server.tests';
-import './resource.tests';
-import './router.tests';
+import { Context } from 'koa';
 import { ApiRoot, ApiRootBad, OtherApi } from './api-root';
-import { Context, Next } from 'koa';
+import { KoaServer } from "@koa-stack/server";
 
-before(() => {
+const server = new KoaServer();
+
+export function setup() {
     server.start(9098);
 
     server.mount('/api', ApiRoot);
@@ -24,8 +21,8 @@ before(() => {
     //     await next();
     //     console.log('>>>>>>>router', ctx.$router);
     // });
-});
+}
 
-after(() => {
+export function teardown() {
     server.stop();
-});
+}

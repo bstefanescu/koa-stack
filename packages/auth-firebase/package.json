@@ -1,6 +1,6 @@
 {
   "name": "@koa-stack/auth-firebase",
-  "version": "0.14.0",
+  "version": "0.14.1",
   "description": "Firebase auth module for @koa-stack/auth",
   "main": "./build/index.js",
   "scripts": {
@@ -21,9 +21,9 @@
   "author": "stefanescu.bogdan@gmail.com",
   "license": "MIT",
   "peerDependencies": {
-    "firebase-admin": "^11.10.1"
+    "firebase-admin": "^12.1.0"
   },
   "dependencies": {
-    "@koa-stack/auth": "^0.14.0"
+    "@koa-stack/auth": "^0.14.1"
   }
 }

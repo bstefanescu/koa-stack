@@ -1,6 +1,6 @@
 {
   "name": "@koa-stack/server",
-  "version": "0.14.0",
+  "version": "0.14.1",
   "description": " A web server based on koa with advanced routing, lazy body and flexbile error handling",
   "main": "./build/index.js",
   "scripts": {
@@ -21,7 +21,7 @@
   "author": "stefanescu.bogdan@gmail.com",
   "license": "MIT",
   "dependencies": {
-    "@koa-stack/body": "^0.14.0",
-    "@koa-stack/router": "^0.14.0"
+    "@koa-stack/body": "^0.14.1",
+    "@koa-stack/router": "^0.14.1"
   }
 }

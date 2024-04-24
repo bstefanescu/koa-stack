@@ -1,44 +1,44 @@
+import { describe, test } from "vitest";
 import assert from 'assert';
 import request from 'supertest';
-import server from './server';
+
+const server = "http://localhost:9098"
 
 describe('Test koaserver accept requests', () => {
-    it('Accept requests', done => {
-        request(server).get('/').expect(200).then(res => {
-            assert.equal(res.text, 'hello');
-            done();
-        })
+    test('Accept requests', async () => {
+        const res = await request(server).get('/').expect(200);
+        assert.equal(res.text, 'hello');
     });
 });
 
 // describe('Test koaserver accept requests error content type', () => {
 
-//     it('Accept */* => GET / => 404 as HTML', done => {
+//     test('Accept */* => GET / => 404 as HTML', done => {
 //         request(server).get('/').set('Accept', '*/*').expect(404).then(res => {
 //             assert.ok(res.text.startsWith('<!DOCTYPE html>'));
 //             done();
 //         }).catch(err => done(err));
 //     });
-//     it('Accept application/json => GET / => 404', done => {
+//     test('Accept application/json => GET / => 404', done => {
 //         request(server).get('/').set('Accept', 'application/json').expect(404).then(res => {
 //             assert.strictEqual(res.body.statusCode, 404);
 //             done();
 //         }).catch(err => done(err));
 //     });
-//     it('Accept text/htnl => GET / => 404', done => {
+//     test('Accept text/htnl => GET / => 404', done => {
 //         request(server).get('/').set('Accept', 'text/html').expect(404).then(res => {
 //             assert.ok(res.text.startsWith('<!DOCTYPE html>'));
 //             done();
 //         }).catch(err => done(err));
 //     });
-//     it('Accept text/plain => GET / => 404', done => {
+//     test('Accept text/plain => GET / => 404', done => {
 //         request(server).get('/').set('Accept', 'text/plain').expect(404).then(res => {
 //             res.text.startsWith('404 ')
 //             done();
 //         }).catch(err => done(err));
 //     });
 
-//     it('Customize errors using a 404.html file', done => {
+//     test('Customize errors using a 404.html file', done => {
 //         app.context.onerror = errorHandler({
 //             html: __dirname + '/errors'
 //         });
@@ -48,7 +48,7 @@ describe('Test koaserver accept requests', () => {
 //         }).catch(err => done(err));
 //     });
 
-//     it('Customize HTML errors using a function', done => {
+//     test('Customize HTML errors using a function', done => {
 //         app.context.onerror = errorHandler({
 //             html: (data, error, opts) => '<html><body>' + data.statusCode + '</body></html>'
 //         });
@@ -58,7 +58,7 @@ describe('Test koaserver accept requests', () => {
 //         }).catch(err => done(err));
 //     });
 
-//     it('Customize JSON errors using a function', done => {
+//     test('Customize JSON errors using a function', done => {
 
 //         app.context.onerror = errorHandler({
 //             json: (data, error, opts) => {

@@ -1,6 +1,6 @@
 {
   "name": "@koa-stack/body",
-  "version": "0.14.0",
+  "version": "0.14.1",
   "description": "Expose the request body as a promise in koa Context.body",
   "main": "./build/index.js",
   "scripts": {
@@ -23,13 +23,13 @@
   "license": "MIT",
   "dependencies": {
     "formidable": "^3.5.1",
-    "inflation": "^2.0.0",
-    "qs": "^6.11.2",
+    "inflation": "^2.1.0",
+    "qs": "^6.12.1",
     "raw-body": "^2.5.2"
   },
   "devDependencies": {
-    "@types/formidable": "^3.4.2",
-    "@types/inflation": "^2.0.1",
-    "@types/qs": "^6.9.8"
+    "@types/formidable": "^3.4.5",
+    "@types/inflation": "^2.0.4",
+    "@types/qs": "^6.9.15"
   }
 }

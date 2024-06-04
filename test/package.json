@@ -1,6 +1,6 @@
 {
   "name": "@koa-stack/test",
-  "version": "0.14.1",
+  "version": "0.14.2",
   "private": true,
   "description": "Tests",
   "type": "module",
@@ -14,10 +14,10 @@
   "author": "stefanescu.bogdan@gmail.com",
   "license": "MIT",
   "dependencies": {
-    "@koa-stack/auth": "^0.14.1",
-    "@koa-stack/body": "^0.14.1",
-    "@koa-stack/router": "^0.14.1",
-    "@koa-stack/server": "^0.14.1"
+    "@koa-stack/auth": "^0.14.2",
+    "@koa-stack/body": "^0.14.2",
+    "@koa-stack/router": "^0.14.2",
+    "@koa-stack/server": "^0.14.2"
   },
   "devDependencies": {
     "@types/supertest": "^6.0.2",

@@ -7,23 +7,23 @@ export class AuthError extends Error {
         this.statusCode = statusCode;
     }
 
-    static notAuthorized() {
-        return new AuthError('Unauthorized', 401);
+    static notAuthorized(message?: string) {
+        return new AuthError('Unauthorized' + (message ? ': ' + message : ''), 401);
     }
 
-    static noMatchingUserFound() {
-        return new AuthError('No matching user found', 401);
+    static noMatchingUserFound(message?: string) {
+        return new AuthError('No matching user found' + (message ? ': ' + message : ''), 401);
     }
 
-    static notSupported() {
-        return new AuthError('Feature not supported', 401);
+    static notSupported(message?: string) {
+        return new AuthError('Feature not supported' + (message ? ': ' + message : ''), 401);
     }
 
-    static malformedAuthorizationHeader() {
-        return new AuthError('Malformed authorization header', 401)
+    static malformedAuthorizationHeader(message?: string) {
+        return new AuthError('Malformed authorization header' + (message ? ': ' + message : ''), 401)
     }
 
-    static unexpectedError() {
-        return new AuthError('Unexpected error', 500);
+    static unexpectedError(message?: string) {
+        return new AuthError('Unexpected error' + (message ? ': ' + message : ''), 500);
     }
 }

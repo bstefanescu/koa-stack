@@ -20,6 +20,7 @@
     "packages/router",
     "packages/body",
     "packages/auth",
+    "packages/auth-jwt",
     "packages/auth-firebase",
     "packages/server",
     "test"

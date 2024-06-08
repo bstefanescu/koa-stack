@@ -1,0 +1,17 @@
+{
+    "extends": "../../tsconfig.base.json",
+    "references": [
+        {
+            "path": "../auth"
+        }
+    ],
+    "compilerOptions": {
+        "rootDir": "./src",
+        "outDir": "./build",
+        "paths": {
+            "@koa-stack/auth": [
+                "../auth/build"
+            ]
+        },
+    }
+}

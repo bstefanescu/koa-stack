@@ -1,0 +1,29 @@
+{
+  "name": "@koa-stack/auth-jwt",
+  "version": "0.14.2",
+  "description": "JWT auth module for @koa-stack/auth",
+  "main": "./build/index.js",
+  "scripts": {
+    "build": "npm run clean && tsc --build",
+    "clean": "rimraf ./build ./tsconfig.tsbuildinfo",
+    "prepublish": "npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "files": [
+    "build",
+    "src"
+  ],
+  "keywords": [
+    "auth",
+    "koa",
+    "firebase"
+  ],
+  "author": "stefanescu.bogdan@gmail.com",
+  "license": "MIT",
+  "peerDependencies": {
+    "firebase-admin": "^12.1.0"
+  },
+  "dependencies": {
+    "@koa-stack/auth": "^0.14.2"
+  }
+}

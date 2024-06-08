@@ -1,6 +1,6 @@
 {
   "name": "@koa-stack/auth-jwt",
-  "version": "0.14.2",
+  "version": "0.15.0",
   "description": "JWT auth module for @koa-stack/auth",
   "main": "./build/index.js",
   "scripts": {
@@ -24,6 +24,6 @@
     "firebase-admin": "^12.1.0"
   },
   "dependencies": {
-    "@koa-stack/auth": "^0.14.2"
+    "@koa-stack/auth": "^0.15.0"
   }
 }

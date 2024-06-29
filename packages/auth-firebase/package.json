@@ -1,6 +1,6 @@
 {
   "name": "@koa-stack/auth-firebase",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "description": "Firebase auth module for @koa-stack/auth",
   "main": "./build/index.js",
   "scripts": {
@@ -24,6 +24,6 @@
     "firebase-admin": "^12.1.0"
   },
   "dependencies": {
-    "@koa-stack/auth": "^0.15.0"
+    "@koa-stack/auth": "^0.16.0"
   }
 }

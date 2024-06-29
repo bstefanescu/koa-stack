@@ -15,7 +15,7 @@ export interface ErrorInfo {
     expose: boolean;
     ctypes?: ErrorContentType | ErrorContentType[],
     message?: string,
-    detail?: string,
+    details?: string,
     error?: string,
     //[key: string]: any;
 }
@@ -50,7 +50,7 @@ function json(info: ErrorInfo, error: Error | object, opts: ErrorHandlerOpts) {
     if (opts.json) {
         content = opts.json(info, error, opts);
     } else {
-        content = JSON.stringify({ error: info.error, status: info.status, message: info.message });
+        content = JSON.stringify({ error: info.error, status: info.status, message: info.message, details: info.details });
     }
     return content;
 }
@@ -153,7 +153,7 @@ function handleResponse(ctx: Context, err: Error | any, opts: ErrorHandlerOpts =
         expose: err.expose || false,
     };
     if (err.expose && err.message) info.message = err.message;
-    if (err.expose && err.detail) info.detail = err.detail;
+    if (err.expose && err.details) info.details = err.details;
 
     if (opts.updateErrorInfo) {
         opts.updateErrorInfo(ctx, err, info);

@@ -1,9 +1,11 @@
 export class ServerError extends Error {
     statusCode: number;
+    details?: string;
     expose = true; // this will expose the error to the client - see error handling in @koa-stack/server
-    constructor(msgOrCode1: string | number, msgOrCode2?: number | string) {
+    constructor(msgOrCode1: string | number, msgOrCode2?: number | string, details?: string) {
         super();
         this.name = 'ServerError';
+        this.details = details;
         let message: string;
         if (!msgOrCode1 && !msgOrCode2) {
             message = 'Server error';

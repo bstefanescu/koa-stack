@@ -2,11 +2,11 @@
   "name": "@koa-stack/auth",
   "version": "0.16.0",
   "description": "simple authentication framework for koa",
-  "main": "./build/index.js",
+  "main": "./lib/cjs/index.js",
+  "type": "module",
   "scripts": {
-    "build": "npm run clean && tsc --build",
-    "clean": "rimraf ./build ./tsconfig.tsbuildinfo",
-    "prepublish": "npm run build",
+    "build": "pnpm exec tsmod build",
+    "clean": "rimraf ./lib",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "files": [
@@ -18,5 +18,17 @@
   "license": "MIT",
   "dependencies": {
     "koa": "^2.15.3"
+  },
+  "ts_dual_module": {
+    "outDir": "lib"
+  },
+  "exports": {
+    "types": "./lib/types/index.d.ts",
+    "import": "./lib/esm/index.js",
+    "require": "./lib/cjs/index.js"
+  },
+  "types": "./lib/types/index.d.ts",
+  "devDependencies": {
+    "ts-dual-module": "^0.6.3"
   }
 }

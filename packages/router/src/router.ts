@@ -3,14 +3,14 @@ import compose from 'koa-compose';
 import send from 'koa-send';
 import { join as joinPath, resolve as resolvePath } from 'path';
 
-import { errorHandler, ErrorHandlerOpts } from './error';
+import { errorHandler, ErrorHandlerOpts } from './error.js';
 import {
     createPathMatcherUnsafe, createPathPrefixMatcherUnsafe,
     createSimplePrefixMatcher,
     normalizePath,
     PathMatcher, PrefixMatcher
-} from './path-matchers';
-import { ServerError } from './ServerError';
+} from './path-matchers.js';
+import { ServerError } from './ServerError.js';
 
 
 declare module 'koa' {

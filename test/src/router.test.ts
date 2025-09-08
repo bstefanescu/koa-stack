@@ -16,7 +16,7 @@ describe('Test router features', () => {
         });
     });
 
-    test('nested routers works', done => {
+    test('nested routers works', () => {
         return request(server).get('/api-other/child/hello').then((res) => {
             expect(res.status).to.be.equal(200);
         });

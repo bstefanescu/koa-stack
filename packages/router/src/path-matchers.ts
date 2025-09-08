@@ -57,7 +57,7 @@ export function createPathPrefixMatcherUnsafe(prefix: string): PrefixMatcher {
 }
 
 function createRootPrefixMatcher(): PrefixMatcher {
-    return (ctx: Context, path: string) => {
+    return (_ctx: Context, _path: string) => {
         // the current path is already set nd is not changing
         return true;
     }

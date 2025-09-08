@@ -1,10 +1,10 @@
 import { Context } from 'koa';
-import { ApiRoot, ApiRootBad, OtherApi } from './api-root';
+import { ApiRoot, ApiRootBad, OtherApi } from './api-root.js';
 import { KoaServer } from "@koa-stack/server";
 
 const server = new KoaServer();
 
-export function setup() {
+export async function setup() {
     server.start(9098);
 
     server.mount('/api', ApiRoot);
@@ -23,6 +23,6 @@ export function setup() {
     // });
 }
 
-export function teardown() {
+export async function teardown() {
     server.stop();
 }

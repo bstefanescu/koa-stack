@@ -7,10 +7,11 @@
     ],
     "compilerOptions": {
         "rootDir": "./src",
-        "outDir": "./build",
+        "outDir": "./lib/esm",
+        "declarationDir": "./lib/types",
         "paths": {
             "@koa-stack/auth": [
-                "../auth/build"
+                "../auth/src"
             ]
         },
     }

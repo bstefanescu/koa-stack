@@ -1,6 +1,5 @@
 import { Middleware } from "koa";
-import { RouterSetup } from ".";
-import { Resource, Router } from "./router";
+import { Resource, Router, RouterSetup } from "./router.js";
 
 
 function getOrCreateSetupChain(target: any): RouterSetup[] {
@@ -19,7 +18,7 @@ export function filters(...middlewares: Middleware[]) {
     return (constructor: Function) => {
         const chain = getOrCreateSetupChain(constructor);
         for (const middleware of middlewares) {
-            chain.push((resource: any, router: Router) => {
+            chain.push((_resource: any, router: Router) => {
                 router.use(middleware);
             });
         }
@@ -32,7 +31,7 @@ export function routes(map: Record<string, Resource | ResourceConstructor>) {
     return (constructor: Function) => {
         const chain = getOrCreateSetupChain(constructor);
         for (const key in map) {
-            chain.push((resource: any, router: Router) => {
+            chain.push((_resource: any, router: Router) => {
                 router.mount(key, map[key]);
             });
         }
@@ -66,7 +65,7 @@ export function serve(path: string) {
 }
 
 
-export function guard(target: any, propertyKey: string, descriptor: PropertyDescriptor): void {
+export function guard(target: any, propertyKey: string, _descriptor: PropertyDescriptor): void {
     getOrCreateSetupChain(target.constructor).push((resource: any, router: Router) => {
         // we only register it if not other guard was registered
         // this enables overwriting guards from derived classes
@@ -77,7 +76,7 @@ export function guard(target: any, propertyKey: string, descriptor: PropertyDesc
 }
 
 function _route(method: string, path: string) {
-    return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+    return (target: any, propertyKey: string, _descriptor: PropertyDescriptor) => {
         getOrCreateSetupChain(target.constructor).push((resource: any, router: Router) => {
             router.route(method, path, resource[propertyKey], resource);
         });

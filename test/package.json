@@ -6,9 +6,9 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "build": "npm run clean && tsc --project ./tsconfig.build.json",
-    "clean": "rimraf ./build ./tsconfig.tsbuildinfo ./tsconfig.build.tsbuildinfo",
-    "test": "npx vitest run -r ./src"
+    "build": "pnpm run clean && tsc --project ./tsconfig.build.json",
+    "clean": "rimraf ./build",
+    "test": "pnpm exec vitest run -r ./src"
   },
   "keywords": [],
   "author": "stefanescu.bogdan@gmail.com",

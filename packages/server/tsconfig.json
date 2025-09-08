@@ -10,13 +10,14 @@
     ],
     "compilerOptions": {
         "rootDir": "./src",
-        "outDir": "./build",
+        "outDir": "./lib/esm",
+        "declarationDir": "./lib/types",
         "paths": {
             "@koa-stack/router": [
-                "../router/build"
+                "../router/src"
             ],
             "@koa-stack/body": [
-                "../body/build"
+                "../body/src"
             ]
         },
     }

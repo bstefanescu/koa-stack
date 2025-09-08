@@ -1,5 +1,5 @@
-import { Context } from "koa";
-import { Resource, get, guard, Router, serve, route, routes, filters } from "@koa-stack/router";
+import { Context, Next } from "koa";
+import { Resource, get, guard, Router, serve, routes, filters } from "@koa-stack/router";
 
 class UsersApi extends Resource {
     @get()
@@ -9,7 +9,7 @@ class UsersApi extends Resource {
 }
 
 @filters(
-    (ctx, next) => next(), // first filter is doing nothing
+    (_ctx: Context, next: Next) => next(), // first filter is doing nothing
     async (ctx, next) => {
         await next();
         ctx.status = 204;
@@ -76,7 +76,7 @@ export class ApiRoot extends BaseResource {
     }
 
     @get('/return')
-    getPayloadWithReturn(ctx: Context) {
+    getPayloadWithReturn(_ctx: Context) {
         return 'returned payload';
     }
 

@@ -1,5 +1,5 @@
+import { filters, get, guard, post, Resource, Router, routes, serve } from "@koa-stack/router";
 import { Context, Next } from "koa";
-import { Resource, get, guard, Router, serve, routes, filters } from "@koa-stack/router";
 
 class UsersApi extends Resource {
     @get()
@@ -83,6 +83,15 @@ export class ApiRoot extends BaseResource {
     // correct way to overwrite endpoint
     getOverwriteBase(ctx: Context) {
         ctx.body = 'ApiRoot overwrite';
+    }
+
+    @post('/optional-body')
+    postBody(ctx: Context) {
+        if (ctx.hasPayload) {
+            ctx.body = 'has body';
+        } else {
+            ctx.body = 'no body';
+        }
     }
 
 }

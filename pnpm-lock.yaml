@@ -136,6 +136,9 @@ importers:
       '@koa-stack/router':
         specifier: workspace:*
         version: link:../router
+      koa:
+        specifier: ^2.15.3
+        version: 2.16.2
     devDependencies:
       ts-dual-module:
         specifier: ^0.6.3
@@ -144,17 +147,17 @@ importers:
   test:
     dependencies:
       '@koa-stack/auth':
-        specifier: ^0.16.0
-        version: 0.16.0
+        specifier: workspace:*
+        version: link:../packages/auth
       '@koa-stack/body':
-        specifier: ^0.16.0
-        version: 0.16.0
+        specifier: workspace:*
+        version: link:../packages/body
       '@koa-stack/router':
-        specifier: ^0.16.0
-        version: 0.16.0
+        specifier: workspace:*
+        version: link:../packages/router
       '@koa-stack/server':
-        specifier: ^0.16.0
-        version: 0.16.0
+        specifier: workspace:*
+        version: link:../packages/server
     devDependencies:
       '@types/supertest':
         specifier: ^6.0.2
@@ -389,18 +392,6 @@ packages:
 
   '@js-sdsl/ordered-map@4.4.2':
     resolution: {integrity: sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==}
-
-  '@koa-stack/auth@0.16.0':
-    resolution: {integrity: sha512-KUP3W/zmyz/c9pPdinxQLFKHQey7Ls5UDlRk1wkmnzPMZyYmxElSKdEzEEp50p5yr7JPBa/mPngy6SgtkM6vHQ==}
-
-  '@koa-stack/body@0.16.0':
-    resolution: {integrity: sha512-lZclXl7UX6MlY6rAYlYNvtuOkl0UDJEpn4Cf1z87dRgw0ZLX7dDlLeYURespa4lkqUyWtAOMaQ0/VgCyFOcOgQ==}
-
-  '@koa-stack/router@0.16.0':
-    resolution: {integrity: sha512-cA0z0UY+nSxOd48hxhXvmmWl0MybxFoX9Az6JOmmPw1hjin13ZPMLbcgNbMRfjRbIPXT5hMapXSpIYet2L/fjg==}
-
-  '@koa-stack/server@0.16.0':
-    resolution: {integrity: sha512-v35YubC5s/3Fz5+CaLjmHm8NqW9MaNe8vAjH/S323Gnz3ewDpJQ67MHnlZym2bZoQWunBopas9h71wu/ZMEQNg==}
 
   '@noble/hashes@1.8.0':
     resolution: {integrity: sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==}
@@ -2210,35 +2201,6 @@ snapshots:
 
   '@js-sdsl/ordered-map@4.4.2':
     optional: true
-
-  '@koa-stack/auth@0.16.0':
-    dependencies:
-      koa: 2.16.2
-    transitivePeerDependencies:
-      - supports-color
-
-  '@koa-stack/body@0.16.0':
-    dependencies:
-      formidable: 3.5.4
-      inflation: 2.1.0
-      qs: 6.14.0
-      raw-body: 2.5.2
-
-  '@koa-stack/router@0.16.0':
-    dependencies:
-      koa: 2.16.2
-      koa-send: 5.0.1
-      path-to-regexp: 6.3.0
-      statuses: 2.0.2
-    transitivePeerDependencies:
-      - supports-color
-
-  '@koa-stack/server@0.16.0':
-    dependencies:
-      '@koa-stack/body': 0.16.0
-      '@koa-stack/router': 0.16.0
-    transitivePeerDependencies:
-      - supports-color
 
   '@noble/hashes@1.8.0': {}
 

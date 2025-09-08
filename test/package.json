@@ -14,10 +14,10 @@
   "author": "stefanescu.bogdan@gmail.com",
   "license": "MIT",
   "dependencies": {
-    "@koa-stack/auth": "^0.16.0",
-    "@koa-stack/body": "^0.16.0",
-    "@koa-stack/router": "^0.16.0",
-    "@koa-stack/server": "^0.16.0"
+    "@koa-stack/auth": "workspace:*",
+    "@koa-stack/body": "workspace:*",
+    "@koa-stack/router": "workspace:*",
+    "@koa-stack/server": "workspace:*"
   },
   "devDependencies": {
     "@types/supertest": "^6.0.2",

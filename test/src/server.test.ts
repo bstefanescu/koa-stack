@@ -11,6 +11,15 @@ describe('Test koaserver accept requests', () => {
     });
 });
 
+describe('Test body parsing', () => {
+    test('ctx.hasPayload works', async () => {
+        // let res = await request(server).post('/api/optional-body').expect(200);
+        // assert.equal(res.text, 'no body');
+        let res = await request(server).post('/api/optional-body').send({ message: "hello" }).expect(200);
+        assert.equal(res.text, 'has body');
+    });
+});
+
 // describe('Test koaserver accept requests error content type', () => {
 
 //     test('Accept */* => GET / => 404 as HTML', done => {

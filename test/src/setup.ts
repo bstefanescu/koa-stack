@@ -2,7 +2,7 @@ import { Context } from 'koa';
 import { ApiRoot, ApiRootBad, OtherApi } from './api-root.js';
 import { KoaServer } from "@koa-stack/server";
 
-const server = new KoaServer();
+const server = new KoaServer().withLazyBody();
 
 export async function setup() {
     server.start(9098);

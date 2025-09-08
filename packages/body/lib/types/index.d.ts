@@ -5,6 +5,7 @@ import Koa, { Context } from 'koa';
 declare module 'koa' {
     interface BaseContext {
         payload: Promise<LazyBody>;
+        hasPayload: boolean;
     }
 }
 export interface OwnOpts {

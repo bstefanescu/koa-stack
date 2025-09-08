@@ -6,7 +6,8 @@ import Koa, { Context, Request } from 'koa';
 
 declare module 'koa' {
     interface BaseContext {
-        payload: Promise<LazyBody>
+        payload: Promise<LazyBody>,
+        hasPayload: boolean,
     }
 }
 
@@ -180,6 +181,13 @@ export class LazyBody {
             set(body) {
                 this.request.body = body;
             }
+        });
+        // payload is an alias to request.hasBody in v3
+        Object.defineProperty(koa.context, 'hasPayload', {
+            get() {
+                return this.request.length > 0 ||
+                    this.request.headers['transfer-encoding'] != null;
+            },
         });
     }
 

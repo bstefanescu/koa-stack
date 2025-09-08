@@ -7,7 +7,7 @@
   "scripts": {
     "build": "pnpm exec tsmod build",
     "clean": "rimraf ./lib",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\""
   },
   "files": [
     "build",
@@ -22,7 +22,8 @@
   "license": "MIT",
   "dependencies": {
     "@koa-stack/body": "workspace:*",
-    "@koa-stack/router": "workspace:*"
+    "@koa-stack/router": "workspace:*",
+    "koa": "^2.15.3"
   },
   "ts_dual_module": {
     "outDir": "lib"

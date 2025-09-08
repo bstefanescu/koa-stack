@@ -166,6 +166,13 @@ export class LazyBody {
                 this.request.body = body;
             }
         });
+        // payload is an alias to request.hasBody in v3
+        Object.defineProperty(koa.context, 'hasPayload', {
+            get() {
+                return this.request.length > 0 ||
+                    this.request.headers['transfer-encoding'] != null;
+            },
+        });
     }
 }
 var FormType;

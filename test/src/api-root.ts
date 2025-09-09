@@ -97,7 +97,8 @@ export class ApiRoot extends BaseResource {
     @post('/null-body')
     async parseNullBody(ctx: Context) {
         const payload = (await ctx.payload);
-        ctx.body = payload.isEmpty ? "null body" : "not null body";
+        const json = payload.json;
+        ctx.body = payload.isEmpty && json === undefined ? "null body" : "unexpected body";
     }
 
 }

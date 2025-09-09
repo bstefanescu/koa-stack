@@ -31,6 +31,7 @@
     "@types/formidable": "^3.4.5",
     "@types/inflation": "^2.0.4",
     "@types/qs": "^6.9.15",
+    "fast-xml-parser": "^5.2.5",
     "ts-dual-module": "^0.6.3"
   },
   "ts_dual_module": {

@@ -13,10 +13,14 @@ describe('Test koaserver accept requests', () => {
 
 describe('Test body parsing', () => {
     test('ctx.hasPayload works', async () => {
-        // let res = await request(server).post('/api/optional-body').expect(200);
-        // assert.equal(res.text, 'no body');
-        let res = await request(server).post('/api/optional-body').send({ message: "hello" }).expect(200);
+        let res = await request(server).post('/api/optional-body').expect(200);
+        assert.equal(res.text, 'no body');
+        res = await request(server).post('/api/optional-body').send({ message: "hello" }).expect(200);
         assert.equal(res.text, 'has body');
+    });
+    test('ctx.payload works with null body', async () => {
+        const res = await request(server).post('/api/null-body').set('Content-Type', 'application/json').expect(200);
+        assert.equal(res.text, 'null body');
     });
 });
 

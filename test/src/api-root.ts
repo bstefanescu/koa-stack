@@ -94,6 +94,12 @@ export class ApiRoot extends BaseResource {
         }
     }
 
+    @post('/null-body')
+    async parseNullBody(ctx: Context) {
+        const payload = (await ctx.payload);
+        ctx.body = payload.isEmpty ? "null body" : "not null body";
+    }
+
 }
 
 export class ApiRootBad extends BaseResource {

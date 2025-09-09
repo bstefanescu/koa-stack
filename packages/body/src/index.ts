@@ -3,6 +3,7 @@ import inflate from 'inflation';
 import qs from 'qs';
 import formidable from 'formidable';
 import Koa, { Context, Request } from 'koa';
+import type { XMLParser } from 'fast-xml-parser';
 
 declare module 'koa' {
     interface BaseContext {
@@ -69,6 +70,10 @@ export class LazyBody {
         this.data = data;
         this.raw = raw;
         this.files = files;
+    }
+
+    get isEmpty() {
+        return this.raw === '';
     }
 
     assertJSON(statusCode: number, message: string) {
@@ -211,20 +216,55 @@ async function createBody(koaRequest: Request, opts: LazyBodyOpts) {
         type = FormType.form;
     } else if (koaRequest.is('json', '+json')) {
         // by default we use JSON.parse. You can replace the json parser using opts.json
-        raw = await getRawBodyText(koaRequest, opts);
-        data = opts.json ? opts.json(raw) : JSON.parse(raw);
+        if (koaRequest.ctx.hasPayload) {
+            raw = await getRawBodyText(koaRequest, opts);
+        } else {
+            raw = '';
+        }
+        if (raw === '') { // for JSON we support no content posted
+            data = undefined;
+        } else {
+            data = opts.json ? opts.json(raw) : JSON.parse(raw);
+        }
         type = FormType.json;
     } else if (koaRequest.is('xml', '+xml')) {
         // by default fast-xml-parser is used - to change the parser you should provde an xml parser through opts.xml
         raw = await getRawBodyText(koaRequest, opts);
-        data = opts.xml ? opts.xml(raw) : require('fast-xml-parser').parse(raw);
+        if (opts.xml) {
+            data = opts.xml(raw);
+        } else {
+            let parser = await tryGetXmlParser();
+            if (parser) {
+                data = parser.parse(raw);
+            }
+        }
         type = FormType.xml;
     } else if (koaRequest.is('text/*')) {
         raw = await getRawBodyText(koaRequest, opts);
         type = FormType.text;
     } else {
-        koaRequest.ctx.throw(500, 'Attempting to read text body from an usupported request content type: ' + koaRequest.headers['content-type']);
-        throw '';
+        type = FormType.text;
+        // if has body
+        console.log();
+        if (koaRequest.ctx.hasPayload) {
+            raw = await getRawBodyText(koaRequest, opts);
+        } else {
+            raw = '';
+        }
     }
     return new LazyBody(koaRequest.ctx, type, data, raw, files);
+}
+
+/**
+ * Use fast-xml-parser if available
+ * @returns 
+ */
+async function tryGetXmlParser(): Promise<XMLParser | undefined> {
+    try {
+        const mod = await import("fast-xml-parser") as typeof import("fast-xml-parser");
+        return new mod.XMLParser();
+    } catch (err) {
+        console.warn("Could not find fast-xml-parser. You need to pass xml option for a custom parser", err);
+        return undefined;
+    }
 }

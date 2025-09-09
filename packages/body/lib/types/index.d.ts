@@ -28,6 +28,7 @@ export declare class LazyBody {
     raw: string;
     files: formidable.Files | null | undefined;
     constructor(ctx: Context, type: FormType, data: any, raw: string, files: formidable.Files | null | undefined);
+    get isEmpty(): boolean;
     assertJSON(statusCode: number, message: string): void;
     assertXML(statusCode: number, message: string): void;
     /**

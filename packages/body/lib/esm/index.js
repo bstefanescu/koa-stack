@@ -70,6 +70,9 @@ export class LazyBody {
         this.raw = raw;
         this.files = files;
     }
+    get isEmpty() {
+        return this.raw === '';
+    }
     assertJSON(statusCode, message) {
         if (this.type !== FormType.json) {
             this.ctx.throw(statusCode || 415, message);
@@ -200,14 +203,32 @@ async function createBody(koaRequest, opts) {
     }
     else if (koaRequest.is('json', '+json')) {
         // by default we use JSON.parse. You can replace the json parser using opts.json
-        raw = await getRawBodyText(koaRequest, opts);
-        data = opts.json ? opts.json(raw) : JSON.parse(raw);
+        if (koaRequest.ctx.hasPayload) {
+            raw = await getRawBodyText(koaRequest, opts);
+        }
+        else {
+            raw = '';
+        }
+        if (raw === '') { // for JSON we support no content posted
+            data = undefined;
+        }
+        else {
+            data = opts.json ? opts.json(raw) : JSON.parse(raw);
+        }
         type = FormType.json;
     }
     else if (koaRequest.is('xml', '+xml')) {
         // by default fast-xml-parser is used - to change the parser you should provde an xml parser through opts.xml
         raw = await getRawBodyText(koaRequest, opts);
-        data = opts.xml ? opts.xml(raw) : require('fast-xml-parser').parse(raw);
+        if (opts.xml) {
+            data = opts.xml(raw);
+        }
+        else {
+            let parser = await tryGetXmlParser();
+            if (parser) {
+                data = parser.parse(raw);
+            }
+        }
         type = FormType.xml;
     }
     else if (koaRequest.is('text/*')) {
@@ -215,9 +236,30 @@ async function createBody(koaRequest, opts) {
         type = FormType.text;
     }
     else {
-        koaRequest.ctx.throw(500, 'Attempting to read text body from an usupported request content type: ' + koaRequest.headers['content-type']);
-        throw '';
+        type = FormType.text;
+        // if has body
+        console.log();
+        if (koaRequest.ctx.hasPayload) {
+            raw = await getRawBodyText(koaRequest, opts);
+        }
+        else {
+            raw = '';
+        }
     }
     return new LazyBody(koaRequest.ctx, type, data, raw, files);
+}
+/**
+ * Use fast-xml-parser if available
+ * @returns
+ */
+async function tryGetXmlParser() {
+    try {
+        const mod = await import("fast-xml-parser");
+        return new mod.XMLParser();
+    }
+    catch (err) {
+        console.warn("Could not find fast-xml-parser. You need to pass xml option for a custom parser", err);
+        return undefined;
+    }
 }
 //# sourceMappingURL=index.js.map

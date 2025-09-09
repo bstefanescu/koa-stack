@@ -1,4 +1,37 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -75,6 +108,9 @@ class LazyBody {
         this.data = data;
         this.raw = raw;
         this.files = files;
+    }
+    get isEmpty() {
+        return this.raw === '';
     }
     assertJSON(statusCode, message) {
         if (this.type !== FormType.json) {
@@ -207,14 +243,32 @@ async function createBody(koaRequest, opts) {
     }
     else if (koaRequest.is('json', '+json')) {
         // by default we use JSON.parse. You can replace the json parser using opts.json
-        raw = await getRawBodyText(koaRequest, opts);
-        data = opts.json ? opts.json(raw) : JSON.parse(raw);
+        if (koaRequest.ctx.hasPayload) {
+            raw = await getRawBodyText(koaRequest, opts);
+        }
+        else {
+            raw = '';
+        }
+        if (raw === '') { // for JSON we support no content posted
+            data = undefined;
+        }
+        else {
+            data = opts.json ? opts.json(raw) : JSON.parse(raw);
+        }
         type = FormType.json;
     }
     else if (koaRequest.is('xml', '+xml')) {
         // by default fast-xml-parser is used - to change the parser you should provde an xml parser through opts.xml
         raw = await getRawBodyText(koaRequest, opts);
-        data = opts.xml ? opts.xml(raw) : require('fast-xml-parser').parse(raw);
+        if (opts.xml) {
+            data = opts.xml(raw);
+        }
+        else {
+            let parser = await tryGetXmlParser();
+            if (parser) {
+                data = parser.parse(raw);
+            }
+        }
         type = FormType.xml;
     }
     else if (koaRequest.is('text/*')) {
@@ -222,9 +276,30 @@ async function createBody(koaRequest, opts) {
         type = FormType.text;
     }
     else {
-        koaRequest.ctx.throw(500, 'Attempting to read text body from an usupported request content type: ' + koaRequest.headers['content-type']);
-        throw '';
+        type = FormType.text;
+        // if has body
+        console.log();
+        if (koaRequest.ctx.hasPayload) {
+            raw = await getRawBodyText(koaRequest, opts);
+        }
+        else {
+            raw = '';
+        }
     }
     return new LazyBody(koaRequest.ctx, type, data, raw, files);
+}
+/**
+ * Use fast-xml-parser if available
+ * @returns
+ */
+async function tryGetXmlParser() {
+    try {
+        const mod = await Promise.resolve().then(() => __importStar(require("fast-xml-parser")));
+        return new mod.XMLParser();
+    }
+    catch (err) {
+        console.warn("Could not find fast-xml-parser. You need to pass xml option for a custom parser", err);
+        return undefined;
+    }
 }
 //# sourceMappingURL=index.js.map

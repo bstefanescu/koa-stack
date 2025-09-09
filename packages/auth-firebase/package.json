@@ -1,6 +1,6 @@
 {
   "name": "@koa-stack/auth-firebase",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "description": "Firebase auth module for @koa-stack/auth",
   "main": "./lib/cjs/index.js",
   "type": "module",

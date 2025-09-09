@@ -1,4 +1,5 @@
-import { Middleware } from "koa";
+import { Context, Middleware } from "koa";
+import compose from "koa-compose";
 import { Resource, Router, RouterSetup } from "./router.js";
 
 
@@ -15,15 +16,47 @@ function getOrCreateSetupChain(target: any): RouterSetup[] {
 }
 
 export function filters(...middlewares: Middleware[]) {
-    return (constructor: Function) => {
-        const chain = getOrCreateSetupChain(constructor);
-        for (const middleware of middlewares) {
-            chain.push((_resource: any, router: Router) => {
-                router.use(middleware);
-            });
+    return (...args: any[]) => {
+        if (args.length === 1) {
+            const constructor = args[0] as Function;
+            return resourceFilters(constructor, middlewares);
+        } else if (args.length === 3) {
+            const target = args[0];
+            const propertyKey = args[1] as string;
+            const descriptor = args[2] as PropertyDescriptor;
+            return endpointFilters(target, propertyKey, descriptor, middlewares);
         }
     }
 }
+
+function resourceFilters(constructor: Function, middlewares: Middleware[]) {
+    const chain = getOrCreateSetupChain(constructor);
+    for (const middleware of middlewares) {
+        chain.push((_resource: any, router: Router) => {
+            router.use(middleware);
+        });
+    }
+}
+function endpointFilters(_target: any, _propertyKey: string, descriptor: PropertyDescriptor, middlewares: Middleware[]) {
+    const endpoint = descriptor.value as (ctx: Context) => Promise<any>;
+    const filterFn = compose(middlewares);
+
+    descriptor.value = async function (ctx: Context) {
+        // This is the correct `next` function type for compose
+        await filterFn(ctx, async () => {
+            const result = await endpoint.call(this, ctx);
+            // Set ctx.body if endpoint returned something
+            // the router will not set again the body since the new endpoint
+            // always returns undefined
+            if (result !== undefined) {
+                ctx.body = result;
+            }
+        });
+    };
+}
+
+
+
 
 export type ResourceConstructor<T extends Resource = Resource> = new () => T;
 
@@ -110,3 +143,4 @@ export function patch(path: string = '/') {
 export function trace(path: string = '/') {
     return _route('TRACE', path);
 }
+

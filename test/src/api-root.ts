@@ -63,6 +63,17 @@ export class BaseResource extends Resource {
     }
 }
 
+function pusBodyPart(ctx: Context, part: string) {
+    if (!ctx.__bodyParts) {
+        ctx.__bodyParts = [];
+    }
+    ctx.__bodyParts.push(part);
+}
+
+@filters(async (ctx, next) => {
+    pusBodyPart(ctx, "resource");
+    await next()
+})
 export class ApiRoot extends BaseResource {
     // overwrite access guard
     onAccess(ctx: Context) {
@@ -99,6 +110,30 @@ export class ApiRoot extends BaseResource {
         const payload = (await ctx.payload);
         const json = payload.json;
         ctx.body = payload.isEmpty && json === undefined ? "null body" : "unexpected body";
+    }
+
+
+    @get("/filters")
+    @filters(async (ctx, next) => {
+        pusBodyPart(ctx, "endpoint");
+        await next()
+    })
+    async filters(ctx: Context) {
+        return ctx.__bodyParts ? ctx.__bodyParts.join(",") : "no parts";
+    }
+
+    @get("/filters")
+    @filters(async (ctx, next) => {
+        const paylaod = await ctx.payload;
+        if (paylaod.text === "knock knock") {
+            await next()
+        } else {
+            ctx.status = 403;
+        }
+    })
+    @post("/filters/knock")
+    protectedEndpoint() {
+        return "hello";
     }
 
 }

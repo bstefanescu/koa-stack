@@ -1,5 +1,29 @@
-import { filters, get, guard, post, Resource, Router, routes, serve } from "@koa-stack/router";
+import { filters, get, guard, intercept, post, Resource, Router, routes, serve } from "@koa-stack/router";
 import { Context, Next } from "koa";
+
+async function intrerceptor1(this: any, ctx: Context, endpoint: (ctx: Context) => Promise<any>) {
+    const result = await endpoint(ctx);
+    if (this instanceof ApiIntercept) {
+        return "intercepted: " + (result || '');
+    } else {
+        return "bug: not an instance of ApiIntercept";
+    }
+
+}
+
+@intercept(intrerceptor1)
+export class ApiIntercept extends Resource {
+
+    @get('/test1')
+    getIntercepted(_ctx: Context) {
+        if (this instanceof ApiIntercept) {
+            return 'hello';
+        } else {
+            return 'bug: not an instance of ApiIntercept';
+        }
+    }
+}
+
 
 class UsersApi extends Resource {
     @get()
@@ -74,6 +98,9 @@ function pusBodyPart(ctx: Context, part: string) {
     pusBodyPart(ctx, "resource");
     await next()
 })
+@routes({
+    '/intercept': ApiIntercept
+})
 export class ApiRoot extends BaseResource {
     // overwrite access guard
     onAccess(ctx: Context) {
@@ -137,6 +164,7 @@ export class ApiRoot extends BaseResource {
     }
 
 }
+
 
 export class ApiRootBad extends BaseResource {
 

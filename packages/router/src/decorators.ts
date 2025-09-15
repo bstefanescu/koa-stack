@@ -1,6 +1,6 @@
 import { Context, Middleware } from "koa";
 import compose from "koa-compose";
-import { Resource, Router, RouterSetup } from "./router.js";
+import { EndpointInterceptorFn, Resource, Router, RouterSetup } from "./router.js";
 
 
 function getOrCreateSetupChain(target: any): RouterSetup[] {
@@ -144,3 +144,16 @@ export function trace(path: string = '/') {
     return _route('TRACE', path);
 }
 
+
+/**
+ * Decorator for intercepting endpoint calls
+ * @param interceptor The interceptor function. If null is passed any inherited interceptor is removed
+ */
+export function intercept(interceptor: EndpointInterceptorFn | null) {
+    return (constructor: Function) => {
+        const chain = getOrCreateSetupChain(constructor);
+        chain.push((_resource: any, router: Router) => {
+            router.interceptor = interceptor;
+        });
+    }
+}

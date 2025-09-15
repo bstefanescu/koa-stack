@@ -19,6 +19,8 @@ declare module 'koa' {
     }
 }
 
+export type EndpointInterceptorFn = (this: any, ctx: Context, endpoint: (ctx: Context) => Promise<any>) => Promise<any>;
+
 export type RouteTarget = (ctx: Context) => Promise<any>;
 export type RouterGuard = (ctx: Context) => boolean;
 
@@ -67,8 +69,8 @@ class EndpointRoute implements Route {
         this.pathPattern = normalizePath(pathPattern);
         this.method = method ? method.toUpperCase() : null;
         this.matcher = createPathMatcherUnsafe(this.pathPattern);
-        this.target = target;
         this.thisArg = thisArg;
+        this.target = target.bind(thisArg);
     }
 
     get absPathPattern() {
@@ -102,12 +104,15 @@ class EndpointRoute implements Route {
 
     dispatch(ctx: Context) {
         try {
-            return Promise.resolve(this.target.call(this.thisArg, ctx)).then(r => {
-                if (r !== undefined) {
-                    ctx.body = r;
-                }
-                return r;
-            });
+            return Promise.resolve(this.router.interceptor ?
+                this.router.interceptor.call(this.thisArg, ctx, this.target)
+                :
+                this.target(ctx)).then(r => {
+                    if (r !== undefined) {
+                        ctx.body = r;
+                    }
+                    return r;
+                });
         } catch (err) {
             return Promise.reject(err);
         }
@@ -173,6 +178,7 @@ export abstract class AbstractRouter<T extends AbstractRouter<T>> implements Rou
     filtersFn?: Middleware;
     webRoot: string;
     errorHandlerOpts?: ErrorHandlerOpts;
+    interceptor: EndpointInterceptorFn | null = null;
 
     constructor(prefix: string = '/', opts: RouterOpts = {}, parent?: AbstractRouter<T>) {
         this.prefix = normalizePath(prefix);
@@ -180,6 +186,7 @@ export abstract class AbstractRouter<T extends AbstractRouter<T>> implements Rou
         this.errorHandlerOpts = opts.errorHandlers;
         this.prefixMatcher = createPathPrefixMatcherUnsafe(this.prefix);
         this.parent = parent;
+        this.interceptor = parent ? parent.interceptor : null;
     }
 
     get absPrefix(): string {
@@ -256,6 +263,11 @@ export abstract class AbstractRouter<T extends AbstractRouter<T>> implements Rou
 
     onError(ctx: Context, err: any): void {
         return errorHandler(ctx, err, { htmlRoot: joinPath(this.webRoot, '/errors'), ...this.errorHandlerOpts });
+    }
+
+    withInterceptor(interceptor: EndpointInterceptorFn | null) {
+        this.interceptor = interceptor;
+        return this;
     }
 
     withGuard(guard: RouterGuard) {

@@ -38,3 +38,10 @@ describe('Test @filters decorator', () => {
 });
 
 
+describe('Test @intercept decorator', () => {
+    test('@intecept is working', async () => {
+        const res = await request(server).get('/api/intercept/test1').expect(200);
+        expect(res.text).to.be.equal("intercepted: hello");
+    });
+});
+

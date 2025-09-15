@@ -1,6 +1,6 @@
 {
   "name": "@koa-stack/body",
-  "version": "0.19.0",
+  "version": "0.20.0",
   "description": "Expose the request body as a promise in koa Context.body",
   "main": "./lib/cjs/index.js",
   "type": "module",

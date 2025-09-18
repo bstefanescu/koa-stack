@@ -1,6 +1,6 @@
 {
   "name": "@koa-stack/auth",
-  "version": "0.22.0",
+  "version": "0.23.0",
   "description": "simple authentication framework for koa",
   "main": "./lib/cjs/index.js",
   "type": "module",

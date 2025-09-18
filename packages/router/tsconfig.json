@@ -4,5 +4,8 @@
         "rootDir": "./src",
         "outDir": "./lib/esm",
         "declarationDir": "./lib/types",
-    }
+    },
+    "exclude": [
+        "**/*.test.ts"
+    ]
 }

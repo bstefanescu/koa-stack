@@ -38,6 +38,7 @@ export class RouterContext {
     params: any = {};
     path: string;
     matchedPattern?: string;
+    matchedVersion?: number; // the matched endpoint version if any
     // used internally to indicate that the path matched at least an endpoint but the method does not
     // in case of a 405 the value is the endpoint pattern 
     _maybe405?: string;
@@ -253,6 +254,7 @@ export abstract class AbstractRouter<T extends AbstractRouter<T>> implements Rou
                     const versionedRoute = apiVersion.match(route, endpointVersions);
                     if (versionedRoute) {
                         route = versionedRoute;
+                        ctx.$router.matchedVersion = versionedRoute.version;
                     } else {
                         ctx.throw(406, 'No endpoint version found for version ' + (apiVersion.exact ? '' : '~') + apiVersion.version + ' on endpoint ' + route.absPathPattern);
                     }

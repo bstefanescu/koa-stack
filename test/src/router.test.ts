@@ -45,3 +45,31 @@ describe('Test @intercept decorator', () => {
     });
 });
 
+
+describe('Test versioned endpoints', () => {
+    test('initial endpoint lookup without version', async () => {
+        const res = await request(server).get('/api/versions/test1');
+        expect(res.text).to.be.equal("hello");
+    });
+    test('exact version is picked', async () => {
+        const res = await request(server).get('/api/versions/test1').set('X-API-Version', '=20250201');
+        expect(res.text).to.be.equal("hello v2");
+    });
+    test('exact version mismatch returns 406', async () => {
+        const res = await request(server).get('/api/versions/test1').set('X-API-Version', '=20250202');
+        expect(res.status).to.be.equal(406);
+    });
+    test('latest supported version is picked', async () => {
+        const res = await request(server).get('/api/versions/test1').set('X-API-Version', '20250210');
+        expect(res.text).to.be.equal("hello v2");
+    });
+    test('latest supported version is picked - exact', async () => {
+        const res = await request(server).get('/api/versions/test1').set('X-API-Version', '20250301');
+        expect(res.text).to.be.equal("hello v3");
+    });
+    test('latest supported version is picked - default', async () => {
+        const res = await request(server).get('/api/versions/test1').set('X-API-Version', '20240101');
+        expect(res.text).to.be.equal("hello");
+    });
+
+});

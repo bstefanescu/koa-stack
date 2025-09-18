@@ -94,12 +94,37 @@ function pusBodyPart(ctx: Context, part: string) {
     ctx.__bodyParts.push(part);
 }
 
+export class VersionedApi extends Resource {
+
+    @get('/test1')
+    async getHello(_ctx: Context) {
+        return 'hello';
+    }
+
+    @get('/test1', { version: 20250101 })
+    async getV1Hello(_ctx: Context) {
+        return 'hello v1';
+    }
+
+    @get('/test1', { version: 20250201 })
+    async getV2Hello(_ctx: Context) {
+        return 'hello v2';
+    }
+
+    @get('/test1', { version: 20250301 })
+    async getV3Hello(_ctx: Context) {
+        return 'hello v3';
+    }
+
+}
+
 @filters(async (ctx, next) => {
     pusBodyPart(ctx, "resource");
     await next()
 })
 @routes({
-    '/intercept': ApiIntercept
+    '/intercept': ApiIntercept,
+    '/versions': VersionedApi,
 })
 export class ApiRoot extends BaseResource {
     // overwrite access guard

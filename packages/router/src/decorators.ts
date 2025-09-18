@@ -1,6 +1,6 @@
 import { Context, Middleware } from "koa";
 import compose from "koa-compose";
-import { EndpointInterceptorFn, Resource, Router, RouterSetup } from "./router.js";
+import { EndpointInterceptorFn, EndpointRouteOptions, Resource, Router, RouterSetup } from "./router.js";
 
 
 function getOrCreateSetupChain(target: any): RouterSetup[] {
@@ -107,41 +107,56 @@ export function guard(target: any, propertyKey: string, _descriptor: PropertyDes
         }
     });
 }
-
-function _route(method: string, path: string) {
+/**
+ * The version parameter will select the endpoint which match the version requested by the client.
+ * If no version is specified in the request headers the unversioned endpoint will be used
+ * 
+ * @param method 
+ * @param path 
+ * @param version 
+ * @returns 
+ */
+function _route(method: string, path: string, opts?: EndpointRouteOptions) {
     return (target: any, propertyKey: string, _descriptor: PropertyDescriptor) => {
         getOrCreateSetupChain(target.constructor).push((resource: any, router: Router) => {
-            router.route(method, path, resource[propertyKey], resource);
+            router.route(method, path, resource[propertyKey], resource, opts);
         });
     }
 }
-
-export function route(method: string, path: string = '/') {
-    return _route(method, path);
+/**
+ * The version parameter will select the endpoint which match the version requested by the client.
+ * If no version is specified in the request headers the unversioned endpoint will be used
+ * @param method 
+ * @param path 
+ * @param version 
+ * @returns 
+ */
+export function route(method: string, path: string = '/', opts?: EndpointRouteOptions) {
+    return _route(method, path, opts);
 }
-export function get(path: string = '/') {
-    return _route('GET', path);
+export function get(path: string = '/', opts?: EndpointRouteOptions) {
+    return _route('GET', path, opts);
 }
-export function post(path: string = '/') {
-    return _route('POST', path);
+export function post(path: string = '/', opts?: EndpointRouteOptions) {
+    return _route('POST', path, opts);
 }
-export function put(path: string = '/') {
-    return _route('PUT', path);
+export function put(path: string = '/', opts?: EndpointRouteOptions) {
+    return _route('PUT', path, opts);
 }
-export function del(path: string = '/') {
-    return _route('DELETE', path);
+export function del(path: string = '/', opts?: EndpointRouteOptions) {
+    return _route('DELETE', path, opts);
 }
-export function options(path: string = '/') {
-    return _route('OPTIONS', path);
+export function options(path: string = '/', opts?: EndpointRouteOptions) {
+    return _route('OPTIONS', path, opts);
 }
-export function head(path: string = '/') {
-    return _route('HEAD', path);
+export function head(path: string = '/', opts?: EndpointRouteOptions) {
+    return _route('HEAD', path, opts);
 }
-export function patch(path: string = '/') {
-    return _route('PATCH', path);
+export function patch(path: string = '/', opts?: EndpointRouteOptions) {
+    return _route('PATCH', path, opts);
 }
-export function trace(path: string = '/') {
-    return _route('TRACE', path);
+export function trace(path: string = '/', opts?: EndpointRouteOptions) {
+    return _route('TRACE', path, opts);
 }
 
 

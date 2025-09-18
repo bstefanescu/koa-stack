@@ -7,6 +7,8 @@ const server = new KoaServer().withLazyBody();
 export async function setup() {
     server.start(9098);
 
+    server.withVersionHeader('X-API-Version');
+
     server.mount('/api', ApiRoot);
     // test mount instance instead of class
     server.mount('/api-bad', new ApiRootBad());

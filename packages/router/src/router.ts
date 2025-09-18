@@ -11,6 +11,7 @@ import {
     PathMatcher, PrefixMatcher
 } from './path-matchers.js';
 import { ServerError } from './ServerError.js';
+import { ApiVersion, EndpointVersions, VersionedEndpointRoute } from "./version.js";
 
 
 declare module 'koa' {
@@ -29,6 +30,9 @@ export interface Route {
     dispatch(ctx: Context): Promise<unknown>;
 }
 
+export interface EndpointRouteOptions {
+    version?: string | number
+}
 
 export class RouterContext {
     params: any = {};
@@ -54,15 +58,18 @@ export class RouterContext {
         params && Object.assign(this.params, params);
     }
 }
-
-class EndpointRoute implements Route {
+export class EndpointRoute implements Route {
     router: Router;
     pathPattern: string;
     method: string | null | undefined;
     matcher: PathMatcher;
     target: RouteTarget;
     thisArg: any;
+    // an endpoint version if a version was set. A version is a date number like: 20250921
+    version?: number;
     _absPathPattern?: string;
+    // a unique key for the route in his router. Can be used as a local identifier
+    key: string;
 
     constructor(router: Router, method: string | null | undefined, pathPattern: string, target: RouteTarget, thisArg?: any) {
         this.router = router;
@@ -71,6 +78,12 @@ class EndpointRoute implements Route {
         this.matcher = createPathMatcherUnsafe(this.pathPattern);
         this.thisArg = thisArg;
         this.target = target.bind(thisArg);
+        this.key = (this.method || 'ALL') + ':' + this.pathPattern;
+    }
+
+    withVersion(version: string | number) {
+        this.version = typeof version === "string" ? parseVersion(version) : version;
+        return this;
     }
 
     get absPathPattern() {
@@ -167,6 +180,7 @@ type RouterOpts = {
     errorHandlers?: ErrorHandlerOpts
 }
 
+
 export abstract class AbstractRouter<T extends AbstractRouter<T>> implements Route {
     parent?: AbstractRouter<T>;
     _absPrefix?: string;
@@ -174,11 +188,19 @@ export abstract class AbstractRouter<T extends AbstractRouter<T>> implements Rou
     prefixMatcher: PrefixMatcher;
     guard?: RouterGuard;
     routes: Route[] = [];
+    /**
+     * Versioned routes. The key is endpoint key property
+     * All the versions of the same endpoint must have the same key (i.e. METHOD and path_pattern)
+     * The value is a list of routes sorted by the version number (ASC)
+     */
+    route_versions: Record<string, EndpointVersions> = {};
     filters: Middleware[] = [];
     filtersFn?: Middleware;
     webRoot: string;
     errorHandlerOpts?: ErrorHandlerOpts;
     interceptor: EndpointInterceptorFn | null = null;
+    // used to select versioned endpoints when defined
+    versionHeader?: string;
 
     constructor(prefix: string = '/', opts: RouterOpts = {}, parent?: AbstractRouter<T>) {
         this.prefix = normalizePath(prefix);
@@ -187,6 +209,7 @@ export abstract class AbstractRouter<T extends AbstractRouter<T>> implements Rou
         this.prefixMatcher = createPathPrefixMatcherUnsafe(this.prefix);
         this.parent = parent;
         this.interceptor = parent ? parent.interceptor : null;
+        this.versionHeader = parent?.versionHeader;
     }
 
     get absPrefix(): string {
@@ -205,15 +228,35 @@ export abstract class AbstractRouter<T extends AbstractRouter<T>> implements Rou
         return this.prefixMatcher(ctx, path);
     }
 
+    getIncommingApiVersion(ctx: Context): ApiVersion | undefined {
+        if (this.versionHeader) {
+            const value = ctx.headers[this.versionHeader] as string;
+            return value ? new ApiVersion(value) : undefined;
+        }
+        return undefined;
+    }
+
     async _dispatch(ctx: Context): Promise<unknown> {
         if (this.guard) {
             if (!await this.guard(ctx)) {
                 ctx.throw(401);
             }
         }
+
+        const apiVersion = this.getIncommingApiVersion(ctx);
+
         const path = ctx.$router.path;
-        for (const route of this.routes) {
+        for (let route of this.routes) {
             if (route.match(ctx, path)) {
+                if (apiVersion && route instanceof EndpointRoute) {
+                    const endpointVersions = this.route_versions[route.key];
+                    const versionedRoute = apiVersion.match(route, endpointVersions);
+                    if (versionedRoute) {
+                        route = versionedRoute;
+                    } else {
+                        ctx.throw(406, 'No endpoint version found for version ' + (apiVersion.exact ? '' : '~') + apiVersion.version + ' on endpoint ' + route.absPathPattern);
+                    }
+                }
                 return await route.dispatch(ctx);
             }
         }
@@ -265,6 +308,22 @@ export abstract class AbstractRouter<T extends AbstractRouter<T>> implements Rou
         return errorHandler(ctx, err, { htmlRoot: joinPath(this.webRoot, '/errors'), ...this.errorHandlerOpts });
     }
 
+    /**
+     * Set a header name to be used as a version header to select versioned endpoints
+     * The header value must be a date number like 20250921 and represent the build timesptamp of the client so it means:
+     * I want the latest endpoint version which is less or equal with 20250921 
+     * The server will then pick for each endpoint the latest version which is <= with the requested version
+     * If the header value starts with = like =20250921 it means that the client wants the exact version 20250921 for the endpoint
+     * When using the exact match prefix, if no exact match is found a 406 will be returned.
+     * The default version (the unversioned endpoint) will be used when no version header is set or when no specific version match the header.
+     * @param header 
+     * @returns 
+     */
+    withVersionHeader(header: string | null) {
+        this.versionHeader = header ? header.toLocaleLowerCase() : undefined;
+        return this;
+    }
+
     withInterceptor(interceptor: EndpointInterceptorFn | null) {
         this.interceptor = interceptor;
         return this;
@@ -285,8 +344,19 @@ export abstract class AbstractRouter<T extends AbstractRouter<T>> implements Rou
         return this;
     }
 
-    route(method: string | null | undefined, path: string, target: RouteTarget, thisArg?: any) {
-        this.routes.push(new EndpointRoute(this, method, path, target, thisArg));
+    route(method: string | null | undefined, path: string, target: RouteTarget, thisArg?: any, opts?: EndpointRouteOptions) {
+        const route = new EndpointRoute(this, method, path, target, thisArg);
+        if (opts?.version) {
+            route.withVersion(opts.version);
+            // we push the route in a versioned routes list
+            let list = this.route_versions[route.key];
+            if (!list) {
+                list = this.route_versions[route.key] = new EndpointVersions();
+            }
+            list.add(route as VersionedEndpointRoute);
+        } else {
+            this.routes.push(route);
+        }
     }
 
     routeAll(path: string, target: RouteTarget) {
@@ -384,3 +454,11 @@ export abstract class Resource {
     }
 }
 
+
+function parseVersion(text: string) {
+    const value = parseInt(text, 10);
+    if (isNaN(value)) {
+        throw new Error('Invalid version number: ' + text);
+    }
+    return value;
+}

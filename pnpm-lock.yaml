@@ -130,6 +130,9 @@ importers:
       ts-dual-module:
         specifier: ^0.6.3
         version: 0.6.3
+      vitest:
+        specifier: ^1.6.1
+        version: 1.6.1(@types/node@24.3.1)
 
   packages/server:
     dependencies:
